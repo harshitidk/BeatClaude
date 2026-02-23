@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth ───────────────────────────────────────────────
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+
+  jobs Job[]
+}
+
+model MagicLinkToken {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+// ─── Jobs ───────────────────────────────────────────────
+model Job {
+  id             String   @id @default(uuid())
+  title          String
+  rawJd          String   @default("")
+  createdBy      String
+  status         String   @default("draft") // draft | active | closed
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  lastActivityAt DateTime @default(now())
+
+  creator      User                @relation(fields: [createdBy], references: [id])
+  parsedSchema ParsedSchema?
+  test         Test?
+  submissions  CandidateSubmission[]
+}
+
+// ─── Parsing (future) ───────────────────────────────────
+model ParsedSchema {
+  id                 String  @id @default(uuid())
+  jobId              String  @unique
+  function           String  // Marketing | Finance | HR | Operations | Engineering | Design | Sales | Other
+  roleFamily         String  @default("")
+  seniority          String  // Entry | Mid | Senior
+  competencies       String  // JSON: [{ name, weight }]
+  tooling            String  // JSON: ["tool1", "tool2"]
+  decisionContext    String
+  constraints        String  @default("[]") // JSON: ["constraint1", ...]
+  confidence         Float
+  rawResponse        String  @default("") // Raw Gemini response for debugging
+  validationErrors   String  @default("[]") // JSON array of error strings
+  validationWarnings String  @default("[]") // JSON array of warning strings
+  isValid            Boolean @default(true)
+  createdAt          DateTime @default(now())
+
+  job Job @relation(fields: [jobId], references: [id])
+}
+
+// ─── Tests (future) ─────────────────────────────────────
+model Test {
+  id        String   @id @default(uuid())
+  jobId     String   @unique
+  status    String   @default("Draft")
+  questions String
+  createdAt DateTime @default(now())
+
+  job Job @relation(fields: [jobId], references: [id])
+}
+
+// ─── Candidate Submissions ──────────────────────────────
+model CandidateSubmission {
+  id          String   @id @default(uuid())
+  jobId       String
+  submittedAt DateTime @default(now())
+
+  job Job @relation(fields: [jobId], references: [id])
+}

@@ -1,0 +1,226 @@
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import DashboardHeader from '@/components/DashboardHeader';
+import EmptyState from '@/components/EmptyState';
+import JobsTable from '@/components/JobsTable';
+
+interface Job {
+    id: string;
+    title: string;
+    status: 'draft' | 'active' | 'closed';
+    submitted_count: number;
+    last_activity_at: string;
+    created_at: string;
+}
+
+type DashboardState = 'loading' | 'empty' | 'populated' | 'error';
+
+export default function DashboardPage() {
+    const router = useRouter();
+    const [state, setState] = useState<DashboardState>('loading');
+    const [jobs, setJobs] = useState<Job[]>([]);
+    const [error, setError] = useState('');
+    const [userEmail, setUserEmail] = useState('');
+    const [creating, setCreating] = useState(false);
+
+    const getToken = useCallback(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            router.push('/login');
+            return null;
+        }
+        return token;
+    }, [router]);
+
+    const fetchDashboard = useCallback(async () => {
+        const token = getToken();
+        if (!token) return;
+
+        try {
+            const res = await fetch('/api/dashboard', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (res.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                router.push('/login');
+                return;
+            }
+
+            if (!res.ok) {
+                const data = await res.json();
+                setError(data.error || 'Failed to fetch dashboard data');
+                setState('error');
+                return;
+            }
+
+            const data = await res.json();
+            setJobs(data.jobs);
+            setState(data.jobs.length === 0 ? 'empty' : 'populated');
+        } catch {
+            setError('Network error. Please check your connection.');
+            setState('error');
+        }
+    }, [getToken, router]);
+
+    useEffect(() => {
+        // Get user info
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                setUserEmail(user.email || '');
+            } catch { /* ignore */ }
+        }
+
+        fetchDashboard();
+    }, [fetchDashboard]);
+
+    const handleCreateJob = () => {
+        router.push('/dashboard/new-job');
+    };
+
+    const handleStatusChange = async (jobId: string, newStatus: string) => {
+        const token = getToken();
+        if (!token) return;
+
+        try {
+            const res = await fetch(`/api/jobs/${jobId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ status: newStatus }),
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                alert(data.error || 'Failed to update status');
+                return;
+            }
+
+            // Refresh dashboard
+            await fetchDashboard();
+        } catch {
+            alert('Network error. Please try again.');
+        }
+    };
+
+    return (
+        <div className="flex min-h-screen flex-col bg-[#f5f6f8]">
+            <DashboardHeader
+                userEmail={userEmail}
+                onCreateJob={handleCreateJob}
+                creating={creating}
+            />
+
+            {/* Loading State */}
+            {state === 'loading' && (
+                <main className="flex-1 mx-auto w-full max-w-6xl px-6 py-10">
+                    {/* Skeleton heading */}
+                    <div className="mb-8">
+                        <div className="mb-2 h-8 w-52 animate-pulse rounded-lg bg-gray-200" />
+                        <div className="h-4 w-80 animate-pulse rounded-lg bg-gray-100" />
+                    </div>
+
+                    {/* Skeleton table */}
+                    <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+                        {/* Header */}
+                        <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 border-b border-gray-100 bg-gray-50/80 px-6 py-3.5">
+                            {['w-24', 'w-16', 'w-20', 'w-20', 'w-12'].map((w, i) => (
+                                <div key={i} className={`h-3 ${w} animate-pulse rounded bg-gray-200`} />
+                            ))}
+                        </div>
+                        {/* Rows */}
+                        {[...Array(5)].map((_, i) => (
+                            <div
+                                key={i}
+                                className={`grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-center gap-4 px-6 py-4 ${i < 4 ? 'border-b border-gray-100' : ''
+                                    }`}
+                            >
+                                <div className="space-y-1.5">
+                                    <div className={`h-4 animate-pulse rounded bg-gray-200`} style={{ width: `${120 + Math.random() * 80}px` }} />
+                                </div>
+                                <div className="h-6 w-16 animate-pulse rounded-full bg-gray-100" />
+                                <div className="h-4 w-10 animate-pulse rounded bg-gray-100" />
+                                <div className="h-4 w-24 animate-pulse rounded bg-gray-100" />
+                                <div className="h-6 w-6 animate-pulse rounded bg-gray-100" />
+                            </div>
+                        ))}
+                        {/* Footer */}
+                        <div className="border-t border-gray-100 bg-gray-50/50 px-6 py-3">
+                            <div className="flex items-center gap-2">
+                                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-400" />
+                                <span className="text-xs text-gray-400 animate-pulse">Gathering your latest recruitment data</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="mt-6 mx-auto max-w-sm">
+                        <div className="h-1 overflow-hidden rounded-full bg-gray-200">
+                            <div className="h-full w-1/3 animate-[loading_1.5s_ease-in-out_infinite] rounded-full bg-gradient-to-r from-blue-500 to-indigo-500" />
+                        </div>
+                        <p className="mt-2 text-center text-xs text-gray-400 flex items-center justify-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-3.5 w-3.5 animate-spin">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                            </svg>
+                            Gathering your latest recruitment data
+                        </p>
+                    </div>
+                </main>
+            )}
+
+            {/* Error State */}
+            {state === 'error' && (
+                <main className="flex flex-1 flex-col items-center justify-center px-4">
+                    <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center max-w-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="mx-auto mb-4 h-10 w-10 text-red-400">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                        <p className="text-sm font-medium text-red-700">{error}</p>
+                        <div className="mt-4 flex justify-center gap-3">
+                            <button
+                                onClick={() => { setState('loading'); fetchDashboard(); }}
+                                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors"
+                            >
+                                Retry
+                            </button>
+                            <button
+                                onClick={handleCreateJob}
+                                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                                Create a job anyway
+                            </button>
+                        </div>
+                    </div>
+                </main>
+            )}
+
+            {/* Empty State */}
+            {state === 'empty' && (
+                <EmptyState onCreateJob={handleCreateJob} creating={creating} />
+            )}
+
+            {/* Populated State */}
+            {state === 'populated' && (
+                <main className="mx-auto w-full max-w-6xl px-6 py-10">
+                    {/* Heading */}
+                    <div className="mb-8">
+                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Jobs Dashboard</h1>
+                        <p className="mt-1 text-sm text-gray-500">
+                            Manage and monitor your AI-driven recruitment pipeline.
+                        </p>
+                    </div>
+
+                    {/* Jobs table */}
+                    <JobsTable jobs={jobs} onStatusChange={handleStatusChange} />
+                </main>
+            )}
+        </div>
+    );
+}

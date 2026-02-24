@@ -36,6 +36,38 @@ export default function ReviewPage() {
     const [parsed, setParsed] = useState<ParsedData | null>(null);
     const [validation, setValidation] = useState<ValidationInfo | null>(null);
     const [error, setError] = useState('');
+    const [generatingTest, setGeneratingTest] = useState(false);
+
+    const handleGenerateTest = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        setGeneratingTest(true);
+        setError('');
+
+        try {
+            const res = await fetch(`/api/jobs/${jobId}/assessments/generate`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ duration_seconds: 3600 }), // 60 minutes default
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Failed to generate test. Validation rules might have failed.');
+            }
+
+            const assessment = await res.json();
+            router.push(`/dashboard/assessments/${assessment.id}`);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Unknown error generating test');
+        } finally {
+            setGeneratingTest(false);
+        }
+    };
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -153,8 +185,8 @@ export default function ReviewPage() {
                                 <p className="mt-1 text-sm text-gray-500">AI-extracted hiring schema — review and confirm before generating tests.</p>
                             </div>
                             <div className={`rounded-lg px-3 py-1.5 text-xs font-bold uppercase tracking-wider ${validation.valid
-                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                    : 'bg-red-50 text-red-700 border border-red-200'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-red-50 text-red-700 border border-red-200'
                                 }`}>
                                 {validation.valid ? '✓ Valid' : '✗ Needs Review'}
                             </div>
@@ -313,10 +345,18 @@ export default function ReviewPage() {
                                     Back to Dashboard
                                 </Link>
                                 <button
-                                    disabled={!validation.valid}
-                                    className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-blue-200 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                                    onClick={handleGenerateTest}
+                                    disabled={!validation.valid || generatingTest}
+                                    className="relative flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-blue-200 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all min-w-[140px]"
                                 >
-                                    Generate Test →
+                                    {generatingTest ? (
+                                        <svg className="h-5 w-5 animate-spin text-white" viewBox="0 0 24 24" fill="none">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                        </svg>
+                                    ) : (
+                                        'Generate Test →'
+                                    )}
                                 </button>
                             </div>
                         </div>

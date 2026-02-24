@@ -37,13 +37,21 @@ export async function authenticateRequest(
         };
     }
 
-    // Update last login
-    await prisma.user.update({
-        where: { id: decoded.userId },
-        data: { lastLoginAt: new Date() },
-    }).catch(() => {
-        // Silently fail — don't block the request if this update fails
-    });
+    // Update last login and implicitly verify user still exists in DB
+    try {
+        await prisma.user.update({
+            where: { id: decoded.userId },
+            data: { lastLoginAt: new Date() },
+        });
+    } catch {
+        // User not found in database or other db error
+        return {
+            error: NextResponse.json(
+                { error: 'User does not exist or session invalid' },
+                { status: 401 }
+            ),
+        };
+    }
 
     return { user: decoded };
 }

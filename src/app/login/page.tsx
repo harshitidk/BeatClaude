@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -46,8 +47,36 @@ export default function LoginPage() {
         }
     };
 
+    const handleGoogleLogin = async (credential: string) => {
+        setError('');
+        setLoading(true);
 
+        try {
+            const res = await fetch('/api/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential }),
+            });
 
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.error || 'Google login failed');
+                return;
+            }
+
+            // Store token
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+
+            // Redirect to dashboard
+            router.push('/dashboard');
+        } catch {
+            setError('Network error. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
     return (
         <div className="flex min-h-screen flex-col bg-[#f9fafb]">
             <Header />
@@ -149,6 +178,28 @@ export default function LoginPage() {
                             )}
                         </button>
                     </form>
+
+                    {/* Google Login Provider */}
+                    <div className="mt-6 flex items-center justify-center">
+                        <div className="h-px bg-gray-200 flex-1"></div>
+                        <span className="px-4 text-sm text-gray-500">or continue with</span>
+                        <div className="h-px bg-gray-200 flex-1"></div>
+                    </div>
+
+                    <div className="mt-6 flex justify-center w-full">
+                        <GoogleOAuthProvider clientId="698892260567-ljhdidkgos0h4ud74jf2fli337g9990c.apps.googleusercontent.com">
+                            <GoogleLogin
+                                onSuccess={(credentialResponse) => {
+                                    if (credentialResponse.credential) {
+                                        handleGoogleLogin(credentialResponse.credential);
+                                    }
+                                }}
+                                onError={() => {
+                                    setError('Google Login failed');
+                                }}
+                            />
+                        </GoogleOAuthProvider>
+                    </div>
                 </div>
 
                 {/* Sign up link */}

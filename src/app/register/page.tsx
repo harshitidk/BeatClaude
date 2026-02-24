@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -49,6 +50,35 @@ export default function RegisterPage() {
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
             router.push('/login');
+        } catch {
+            setError('Network error. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleLogin = async (credential: string) => {
+        setError('');
+        setLoading(true);
+
+        try {
+            const res = await fetch('/api/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.error || 'Google sign-up failed');
+                return;
+            }
+
+            // Store token and redirect
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            router.push('/dashboard');
         } catch {
             setError('Network error. Please try again.');
         } finally {
@@ -167,6 +197,28 @@ export default function RegisterPage() {
                             )}
                         </button>
                     </form>
+
+                    {/* Google Login Provider */}
+                    <div className="mt-6 flex items-center justify-center">
+                        <div className="h-px bg-gray-200 flex-1"></div>
+                        <span className="px-4 text-sm text-gray-500">or sign up with</span>
+                        <div className="h-px bg-gray-200 flex-1"></div>
+                    </div>
+
+                    <div className="mt-6 flex justify-center w-full">
+                        <GoogleOAuthProvider clientId="698892260567-ljhdidkgos0h4ud74jf2fli337g9990c.apps.googleusercontent.com">
+                            <GoogleLogin
+                                onSuccess={(credentialResponse) => {
+                                    if (credentialResponse.credential) {
+                                        handleGoogleLogin(credentialResponse.credential);
+                                    }
+                                }}
+                                onError={() => {
+                                    setError('Google Sign-up failed');
+                                }}
+                            />
+                        </GoogleOAuthProvider>
+                    </div>
                 </div>
 
                 {/* Sign in link */}

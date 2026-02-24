@@ -9,6 +9,10 @@ import JobsTable from '@/components/JobsTable';
 interface Job {
     id: string;
     title: string;
+    role_family?: string;
+    seniority?: string;
+    job_function?: string;
+    has_parsed_schema?: boolean;
     status: 'draft' | 'active' | 'closed';
     submitted_count: number;
     last_activity_at: string;
@@ -83,6 +87,50 @@ export default function DashboardPage() {
         router.push('/dashboard/new-job');
     };
 
+    const handleInlineSubmitJd = async (description: string) => {
+        const token = getToken();
+        if (!token) throw new Error('Not authenticated');
+
+        // Step 1: Create job
+        const createRes = await fetch('/api/jobs', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ description }),
+        });
+
+        if (!createRes.ok) {
+            if (createRes.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                router.push('/login');
+                return;
+            }
+            const data = await createRes.json();
+            throw new Error(data.error || 'Failed to create job');
+        }
+
+        const job = await createRes.json();
+
+        // Step 2: Parse JD with Gemini
+        const parseRes = await fetch(`/api/jobs/${job.id}/parse`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!parseRes.ok) {
+            // Still redirect to review even on parse failure
+            router.push(`/dashboard/jobs/${job.id}/review`);
+            return;
+        }
+
+        // Step 3: Redirect to review page
+        router.push(`/dashboard/jobs/${job.id}/review`);
+    };
+
+
     const handleStatusChange = async (jobId: string, newStatus: string) => {
         const token = getToken();
         if (!token) return;
@@ -100,6 +148,31 @@ export default function DashboardPage() {
             if (!res.ok) {
                 const data = await res.json();
                 alert(data.error || 'Failed to update status');
+                return;
+            }
+
+            // Refresh dashboard
+            await fetchDashboard();
+        } catch {
+            alert('Network error. Please try again.');
+        }
+    };
+
+    const handleDeleteJob = async (jobId: string) => {
+        const token = getToken();
+        if (!token) return;
+
+        try {
+            const res = await fetch(`/api/jobs/${jobId}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                alert(data.error || 'Failed to delete assessment');
                 return;
             }
 
@@ -143,7 +216,7 @@ export default function DashboardPage() {
                                     }`}
                             >
                                 <div className="space-y-1.5">
-                                    <div className={`h-4 animate-pulse rounded bg-gray-200`} style={{ width: `${120 + Math.random() * 80}px` }} />
+                                    <div className={`h-4 animate-pulse rounded bg-gray-200`} style={{ width: `${120 + (i % 3) * 40}px` }} />
                                 </div>
                                 <div className="h-6 w-16 animate-pulse rounded-full bg-gray-100" />
                                 <div className="h-4 w-10 animate-pulse rounded bg-gray-100" />
@@ -203,7 +276,7 @@ export default function DashboardPage() {
 
             {/* Empty State */}
             {state === 'empty' && (
-                <EmptyState onCreateJob={handleCreateJob} creating={creating} />
+                <EmptyState onSubmitJd={handleInlineSubmitJd} />
             )}
 
             {/* Populated State */}
@@ -218,7 +291,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Jobs table */}
-                    <JobsTable jobs={jobs} onStatusChange={handleStatusChange} />
+                    <JobsTable jobs={jobs} onStatusChange={handleStatusChange} onDelete={handleDeleteJob} />
                 </main>
             )}
         </div>

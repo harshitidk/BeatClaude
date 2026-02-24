@@ -15,7 +15,9 @@ model User {
   createdAt    DateTime  @default(now())
   lastLoginAt  DateTime?
 
-  jobs Job[]
+  jobs      Job[]
+  invites   Invite[]
+  auditLogs AuditLog[]
 }
 
 model MagicLinkToken {
@@ -39,47 +41,141 @@ model Job {
 
   creator      User                @relation(fields: [createdBy], references: [id])
   parsedSchema ParsedSchema?
-  test         Test?
+  assessments  Assessment[]
   submissions  CandidateSubmission[]
 }
 
-// ─── Parsing (future) ───────────────────────────────────
+// ─── Parsed Schemas ─────────────────────────────────────
 model ParsedSchema {
-  id                 String  @id @default(uuid())
-  jobId              String  @unique
-  function           String  // Marketing | Finance | HR | Operations | Engineering | Design | Sales | Other
-  roleFamily         String  @default("")
-  seniority          String  // Entry | Mid | Senior
-  competencies       String  // JSON: [{ name, weight }]
-  tooling            String  // JSON: ["tool1", "tool2"]
+  id                 String   @id @default(uuid())
+  jobId              String   @unique
+  function           String   // Marketing | Finance | HR | Operations | Engineering | Design | Sales | Other
+  roleFamily         String   @default("")
+  seniority          String   // Entry | Mid | Senior
+  competencies       String   // JSON: [{ name, weight }]
+  tooling            String   // JSON: ["tool1", "tool2"]
   decisionContext    String
-  constraints        String  @default("[]") // JSON: ["constraint1", ...]
+  constraints        String   @default("[]") // JSON: ["constraint1", ...]
   confidence         Float
-  rawResponse        String  @default("") // Raw Gemini response for debugging
-  validationErrors   String  @default("[]") // JSON array of error strings
-  validationWarnings String  @default("[]") // JSON array of warning strings
-  isValid            Boolean @default(true)
+  rawResponse        String   @default("") // Raw LLM response for audit
+  validationErrors   String   @default("[]")
+  validationWarnings String   @default("[]")
+  isValid            Boolean  @default(true)
   createdAt          DateTime @default(now())
 
   job Job @relation(fields: [jobId], references: [id])
 }
 
-// ─── Tests (future) ─────────────────────────────────────
-model Test {
-  id        String   @id @default(uuid())
-  jobId     String   @unique
-  status    String   @default("Draft")
-  questions String
-  createdAt DateTime @default(now())
+// ─── Assessments ────────────────────────────────────────
+model Assessment {
+  id                  String    @id @default(uuid())
+  jobId               String
+  status              String    @default("draft") // draft | active | closed
+  durationSeconds     Int       @default(1800)
+  activeFrom          DateTime?
+  activeUntil         DateTime?
+  singleUseMagicLink  Boolean   @default(true)
+  rawGenerationOutput String    @default("") // Raw LLM test generation output
+  createdAt           DateTime  @default(now())
+  publishedAt         DateTime?
+  closedAt            DateTime?
 
-  job Job @relation(fields: [jobId], references: [id])
+  job           Job            @relation(fields: [jobId], references: [id])
+  questions     Question[]
+  invites       Invite[]
+  testInstances TestInstance[]
 }
 
-// ─── Candidate Submissions ──────────────────────────────
+// ─── Questions ──────────────────────────────────────────
+model Question {
+  id              String   @id @default(uuid())
+  assessmentId    String
+  stageIndex      Int      // 1..4
+  positionInStage Int      // 1..4
+  questionType    String   // mcq | short_structured | hybrid_choice_justification
+  promptText      String
+  options         String   @default("[]") // JSON: [{id, label}] for mcq/hybrid
+  charLimit       Int?     // for short_structured
+  scoringHint     String   @default("") // internal hint for scoring
+  internalIntent  String   // baseline | application | judgment | depth
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id])
+  answers    Answer[]
+}
+
+// ─── Invites (Magic Links) ──────────────────────────────
+model Invite {
+  id           String    @id @default(uuid())
+  assessmentId String
+  token        String    @unique
+  expiresAt    DateTime
+  singleUse    Boolean   @default(true)
+  usedAt       DateTime?
+  createdBy    String
+  createdAt    DateTime  @default(now())
+
+  assessment    Assessment     @relation(fields: [assessmentId], references: [id])
+  creator       User           @relation(fields: [createdBy], references: [id])
+  testInstances TestInstance[]
+}
+
+// ─── Test Instances (Candidate Sessions) ────────────────
+model TestInstance {
+  id                  String    @id @default(uuid())
+  assessmentId        String
+  inviteId            String?
+  candidateIdentifier String    @default("")
+  currentStage        Int       @default(1)
+  startedAt           DateTime?
+  completedAt         DateTime?
+  timeTakenSeconds    Int?
+  status              String    @default("not_started") // not_started | in_progress | submitted
+  rawSessionMeta      String    @default("{}") // JSON: { ua, ip_obfuscated }
+  // Scoring fields
+  scoringStatus       String    @default("pending") // pending | scoring | scored | error
+  scoringResult       String    @default("") // JSON: full scoring output
+  recommendation      String    @default("") // Advance | Hold | Reject
+  hrOverride          String    @default("") // HR override recommendation
+  createdAt           DateTime  @default(now())
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id])
+  invite     Invite?    @relation(fields: [inviteId], references: [id])
+  answers    Answer[]
+}
+
+// ─── Answers ────────────────────────────────────────────
+model Answer {
+  id               String    @id @default(uuid())
+  instanceId       String
+  questionId       String
+  answerText       String?
+  selectedOptionId String?
+  submittedAt      DateTime  @default(now())
+
+  instance TestInstance @relation(fields: [instanceId], references: [id])
+  question Question     @relation(fields: [questionId], references: [id])
+
+  @@unique([instanceId, questionId]) // idempotent upserts
+}
+
+// ─── Candidate Submissions (Dashboard Counts) ──────────
 model CandidateSubmission {
   id          String   @id @default(uuid())
   jobId       String
   submittedAt DateTime @default(now())
 
   job Job @relation(fields: [jobId], references: [id])
+}
+
+// ─── Audit Logs ─────────────────────────────────────────
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorId   String?
+  action    String
+  payload   String   @default("{}") // JSON
+  createdAt DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id])
 }

@@ -7,6 +7,7 @@ import Link from 'next/link';
 interface SubmissionSummary {
     id: string;
     candidate_identifier: string;
+    candidate_email: string;
     started_at: string;
     completed_at: string;
     time_taken_seconds: number;
@@ -30,6 +31,8 @@ export default function JobResultsPage() {
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState<ResultsData | null>(null);
     const [error, setError] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterRec, setFilterRec] = useState('All');
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -83,6 +86,45 @@ export default function JobResultsPage() {
         return `${m} min`;
     };
 
+    const filteredSubmissions = data.submissions.filter(sub => {
+        const search = searchTerm.toLowerCase();
+        const matchesSearch = (sub.candidate_identifier || '').toLowerCase().includes(search) ||
+            (sub.candidate_email || '').toLowerCase().includes(search);
+
+        const finalRec = sub.hr_override || sub.recommendation;
+        const matchesRec = filterRec === 'All' || finalRec === filterRec;
+
+        return matchesSearch && matchesRec;
+    });
+
+    const exportToCSV = () => {
+        if (!data || !filteredSubmissions.length) return;
+
+        const headers = ['Name', 'Email', 'Completed At', 'Time Taken (Seconds)', 'Recommendation', 'Override'];
+        const csvRows = [headers.join(',')];
+
+        for (const sub of filteredSubmissions) {
+            const values = [
+                `"${(sub.candidate_identifier || '').replace(/"/g, '""')}"`,
+                `"${(sub.candidate_email || '').replace(/"/g, '""')}"`,
+                sub.completed_at ? `"${new Date(sub.completed_at).toLocaleString()}"` : 'N/A',
+                sub.time_taken_seconds || '0',
+                `"${sub.recommendation || ''}"`,
+                `"${sub.hr_override || ''}"`
+            ];
+            csvRows.push(values.join(','));
+        }
+
+        const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `${data.job_title}_candidates.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="flex min-h-screen flex-col bg-[#f5f6f8]">
             <header className="sticky top-0 z-50 w-full border-b border-gray-200/60 bg-white/80 backdrop-blur-md">
@@ -111,6 +153,43 @@ export default function JobResultsPage() {
                     </div>
                 </div>
 
+                <div className="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                    <div className="relative w-full max-w-md">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Filter by name or email..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-sm"
+                        />
+                    </div>
+                    <div className="relative w-full max-w-xs">
+                        <select
+                            value={filterRec}
+                            onChange={(e) => setFilterRec(e.target.value)}
+                            className="w-full appearance-none rounded-xl border border-gray-200 bg-white py-2.5 pl-4 pr-10 text-sm font-medium text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-sm"
+                        >
+                            <option value="All">All Recommendations</option>
+                            <option value="Advance">Advance</option>
+                            <option value="Hold">Hold</option>
+                            <option value="Reject">Reject</option>
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                    </div>
+                    <button
+                        onClick={exportToCSV}
+                        className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-blue-50 py-2.5 px-4 text-sm font-bold text-blue-700 shadow-sm border border-blue-100 hover:bg-blue-100 transition-all focus:ring-2 focus:ring-blue-500 active:scale-95 whitespace-nowrap ml-auto"
+                    >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        Export CSV
+                    </button>
+                </div>
+
                 <div className="overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-xl shadow-blue-900/5">
                     <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 border-b border-gray-100 bg-gray-50/80 px-8 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">
                         <div>Candidate ID</div>
@@ -121,12 +200,17 @@ export default function JobResultsPage() {
                     </div>
 
                     <div className="divide-y divide-gray-100">
-                        {data.submissions.length === 0 ? (
-                            <div className="p-12 text-center text-gray-500">No submissions yet for this role.</div>
+                        {filteredSubmissions.length === 0 ? (
+                            <div className="p-12 text-center text-gray-500">No matching submissions found.</div>
                         ) : (
-                            data.submissions.map(sub => (
+                            filteredSubmissions.map(sub => (
                                 <div key={sub.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-center gap-4 px-8 py-5 transition-colors hover:bg-blue-50/30">
-                                    <div className="font-mono text-sm font-black text-gray-900">{sub.candidate_identifier}</div>
+                                    <div className="flex flex-col">
+                                        <div className="font-mono text-sm font-black text-gray-900">{sub.candidate_identifier}</div>
+                                        {sub.candidate_email && (
+                                            <div className="text-xs font-medium text-gray-500 mt-0.5">{sub.candidate_email}</div>
+                                        )}
+                                    </div>
                                     <div className="text-sm font-medium text-gray-500">
                                         {new Date(sub.completed_at).toLocaleDateString()}
                                     </div>

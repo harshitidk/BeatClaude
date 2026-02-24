@@ -127,6 +127,7 @@ model TestInstance {
   assessmentId        String
   inviteId            String?
   candidateIdentifier String    @default("")
+  candidateEmail      String    @default("")
   currentStage        Int       @default(1)
   startedAt           DateTime?
   completedAt         DateTime?

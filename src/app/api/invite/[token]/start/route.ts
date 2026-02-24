@@ -60,14 +60,14 @@ export async function POST(
         const body = await request.json().catch(() => ({}));
         const name = body.name?.trim() || 'Anonymous';
         const email = body.email?.trim() || `candidate-${uuidv4().slice(0, 8)}`;
-        const candidateId = `${name} (${email})`;
         const ua = request.headers.get('user-agent') || 'unknown';
 
         const instance = await prisma.testInstance.create({
             data: {
                 assessmentId: invite.assessment.id,
                 inviteId: invite.id,
-                candidateIdentifier: candidateId,
+                candidateIdentifier: name,
+                candidateEmail: email,
                 startedAt: now,
                 status: 'in_progress',
                 currentStage: 1,
@@ -94,7 +94,7 @@ export async function POST(
             total_stages: 4,
             questions,
         });
-    } catch (err) {
+    } catch (err: any) {
         console.error('Start test error:', err);
         return NextResponse.json({ error: 'Failed to start test' }, { status: 500 });
     }

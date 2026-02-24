@@ -37,6 +37,7 @@ export async function GET(
                 id: inst.id,
                 assessment_id: a.id,
                 candidate_identifier: inst.candidateIdentifier,
+                candidate_email: inst.candidateEmail,
                 started_at: inst.startedAt?.toISOString(),
                 completed_at: inst.completedAt?.toISOString(),
                 time_taken_seconds: inst.timeTakenSeconds,

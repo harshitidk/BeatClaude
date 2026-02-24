@@ -63,6 +63,7 @@ export async function GET(
             id: instance.id,
             job_title: instance.assessment.job.title,
             candidate_identifier: instance.candidateIdentifier,
+            candidate_email: instance.candidateEmail,
             status: instance.status,
             started_at: instance.startedAt?.toISOString(),
             completed_at: instance.completedAt?.toISOString(),

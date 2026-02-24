@@ -3,9 +3,10 @@ import { authenticateRequest } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/db';
 
 // Valid state transitions
-const VALID_TRANSITIONS: Record<string, string> = {
-    draft: 'active',
-    active: 'closed',
+const VALID_TRANSITIONS: Record<string, string[]> = {
+    draft: ['active'],
+    active: ['closed'],
+    closed: ['active'],
 };
 
 export async function POST(
@@ -44,24 +45,29 @@ export async function POST(
         }
 
         // Validate state transition
-        const allowedNext = VALID_TRANSITIONS[job.status];
-        if (allowedNext !== newStatus) {
+        const allowedNexts = VALID_TRANSITIONS[job.status] || [];
+        if (!allowedNexts.includes(newStatus)) {
             return NextResponse.json(
                 {
-                    error: `Invalid transition: cannot move from "${job.status}" to "${newStatus}". Allowed: ${allowedNext ? `"${job.status}" → "${allowedNext}"` : 'none (terminal state)'
-                        }`,
+                    error: `Invalid transition: cannot move from "${job.status}" to "${newStatus}".`,
                 },
                 { status: 422 }
             );
         }
 
-        // Update status
+        // Update status for the Job natively
         const updated = await prisma.job.update({
             where: { id },
             data: {
                 status: newStatus,
                 lastActivityAt: new Date(),
             },
+        });
+
+        // Sync status to the Assessment objects (this actually locks the assessments links from working)
+        await prisma.assessment.updateMany({
+            where: { jobId: id },
+            data: { status: newStatus },
         });
 
         return NextResponse.json({

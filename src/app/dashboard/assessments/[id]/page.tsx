@@ -95,7 +95,7 @@ export default function AssessmentBuilderPage() {
                 const inviteRes = await fetch(`/api/assessments/${assessmentId}/generate-invite`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                    body: JSON.stringify({ expires_in_hours: 336 }), // 14 days
+                    body: JSON.stringify({ expires_in_hours: 336, single_use: false }), // 14 days, multi-use
                 });
 
                 if (inviteRes.ok) {

@@ -21,7 +21,14 @@ export async function GET(request: NextRequest) {
                     },
                 },
                 assessments: {
-                    select: { id: true },
+                    select: {
+                        id: true,
+                        invites: {
+                            select: { token: true },
+                            take: 1,
+                            orderBy: { createdAt: 'desc' },
+                        },
+                    },
                     take: 1,
                     orderBy: { createdAt: 'desc' }
                 }
@@ -40,9 +47,18 @@ export async function GET(request: NextRequest) {
                 status: job.status,
                 submitted_count: job._count.submissions,
                 assessment_id: job.assessments.length > 0 ? job.assessments[0].id : null,
+                invite_token: job.assessments.length > 0 && job.assessments[0].invites.length > 0 ? job.assessments[0].invites[0].token : null,
                 last_activity_at: job.lastActivityAt.toISOString(),
                 created_at: job.createdAt.toISOString(),
-            })),
+            })).sort((a, b) => {
+                const order: Record<string, number> = { active: 1, draft: 2, closed: 3 };
+                const aOrder = order[a.status] || 4;
+                const bOrder = order[b.status] || 4;
+                if (aOrder !== bOrder) {
+                    return aOrder - bOrder;
+                }
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            }),
         });
     } catch {
         return NextResponse.json(

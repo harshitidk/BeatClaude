@@ -312,7 +312,7 @@ export default function ReviewPage() {
                         <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm font-bold uppercase tracking-wider text-gray-500">AI Confidence</p>
+                                    <p className="text-sm font-bold uppercase tracking-wider text-gray-500" title="Based on AI's ability to cleanly extract structured data from the provided Job Description.">JD Clarity Score</p>
                                     <p className="mt-1 text-3xl font-black text-gray-900">{(parsed.confidence_score * 100).toFixed(0)}%</p>
                                 </div>
                                 <div className="h-16 w-16">

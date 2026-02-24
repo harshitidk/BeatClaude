@@ -4,7 +4,10 @@ import { generateToken, hashPassword } from '@/lib/auth';
 import { OAuth2Client } from 'google-auth-library';
 import { v4 as uuidv4 } from 'uuid';
 
-const client = new OAuth2Client("698892260567-ljhdidkgos0h4ud74jf2fli337g9990c.apps.googleusercontent.com");
+const client = new OAuth2Client(
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET
+);
 
 export async function POST(request: NextRequest) {
     try {
@@ -20,7 +23,7 @@ export async function POST(request: NextRequest) {
 
         const ticket = await client.verifyIdToken({
             idToken: credential,
-            audience: "698892260567-ljhdidkgos0h4ud74jf2fli337g9990c.apps.googleusercontent.com",
+            audience: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         });
 
         const payload = ticket.getPayload();

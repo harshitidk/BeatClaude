@@ -206,7 +206,7 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="mt-6 flex justify-center w-full">
-                        <GoogleOAuthProvider clientId="698892260567-ljhdidkgos0h4ud74jf2fli337g9990c.apps.googleusercontent.com">
+                        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
                             <GoogleLogin
                                 onSuccess={(credentialResponse) => {
                                     if (credentialResponse.credential) {

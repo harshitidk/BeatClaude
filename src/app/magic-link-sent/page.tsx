@@ -33,14 +33,14 @@ function MagicLinkSentContent() {
                 {/* Card */}
                 <div className="rounded-2xl bg-white p-10 shadow-lg shadow-gray-200/50 text-center">
                     {/* Mail Icon */}
-                    <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
+                    <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
                             viewBox="0 0 24 24"
                             strokeWidth={1.5}
                             stroke="currentColor"
-                            className="h-8 w-8 text-blue-600"
+                            className="h-8 w-8 text-emerald-600"
                         >
                             <path
                                 strokeLinecap="round"
@@ -117,7 +117,7 @@ export default function MagicLinkSentPage() {
     return (
         <Suspense fallback={
             <div className="flex min-h-screen items-center justify-center bg-[#f5f5f7]">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
             </div>
         }>
             <MagicLinkSentContent />

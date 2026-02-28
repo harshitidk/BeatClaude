@@ -92,7 +92,7 @@ function CandidatePortalInvitePage() {
         return (
             <div className="flex min-h-screen items-center justify-center bg-[#f5f6f8]">
                 <div className="flex flex-col items-center">
-                    <svg className="h-8 w-8 animate-spin text-blue-500" viewBox="0 0 24 24" fill="none">
+                    <svg className="h-8 w-8 animate-spin text-emerald-500" viewBox="0 0 24 24" fill="none">
                         <circle cx="12" cy="12" r="10" stroke="#e5e7eb" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
@@ -125,7 +125,7 @@ function CandidatePortalInvitePage() {
         <div className="flex min-h-screen flex-col bg-[#f5f6f8]">
             <header className="flex h-16 w-full items-center justify-center bg-white shadow-sm">
                 <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 shadow-sm shadow-blue-200">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-teal-700 shadow-sm shadow-emerald-200">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" /></svg>
                     </div>
                     <span className="text-lg font-black text-gray-900 tracking-tight">Beat Claude</span>
@@ -133,8 +133,8 @@ function CandidatePortalInvitePage() {
             </header>
 
             <main className="flex flex-1 flex-col items-center justify-center p-6 pb-24">
-                <div className="w-full max-w-2xl rounded-[32px] border border-gray-200 bg-white p-10 shadow-xl shadow-blue-900/5 sm:p-14">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-blue-600 mb-6 border border-blue-100 shadow-sm">
+                <div className="w-full max-w-2xl rounded-[32px] border border-gray-200 bg-white p-10 shadow-xl shadow-emerald-900/5 sm:p-14">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 mb-6 border border-emerald-100 shadow-sm">
                         <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                     </div>
 
@@ -152,10 +152,10 @@ function CandidatePortalInvitePage() {
                             <span className="mt-1 text-xs font-bold uppercase tracking-widest text-gray-400">Time Limit</span>
                             <span className="mt-2 text-center text-[11px] font-medium leading-tight text-gray-500">The timer cannot be paused once started.</span>
                         </div>
-                        <div className="flex flex-col items-center rounded-2xl bg-blue-50 p-6 shadow-sm border border-blue-100">
-                            <span className="text-2xl font-black text-blue-900">16 Qs</span>
-                            <span className="mt-1 text-xs font-bold uppercase tracking-widest text-blue-400">Total Questions</span>
-                            <span className="mt-2 text-center text-[11px] font-medium leading-tight text-blue-600">Divided into 4 stages. You cannot return to a previous stage.</span>
+                        <div className="flex flex-col items-center rounded-2xl bg-emerald-50 p-6 shadow-sm border border-emerald-100">
+                            <span className="text-2xl font-black text-emerald-900">16 Qs</span>
+                            <span className="mt-1 text-xs font-bold uppercase tracking-widest text-emerald-400">Total Questions</span>
+                            <span className="mt-2 text-center text-[11px] font-medium leading-tight text-emerald-600">Divided into 4 stages. You cannot return to a previous stage.</span>
                         </div>
                     </div>
 
@@ -179,7 +179,7 @@ function CandidatePortalInvitePage() {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             disabled={starting}
-                            className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm font-medium text-gray-900 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                            className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm font-medium text-gray-900 focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
                         />
                         <input
                             type="email"
@@ -187,7 +187,7 @@ function CandidatePortalInvitePage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             disabled={starting}
-                            className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm font-medium text-gray-900 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                            className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm font-medium text-gray-900 focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
                         />
                     </div>
 
@@ -195,7 +195,7 @@ function CandidatePortalInvitePage() {
                         <button
                             onClick={handleStartTest}
                             disabled={starting}
-                            className={`w-full max-w-[320px] rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 text-base font-black text-white shadow-xl shadow-blue-500/20 transition-all hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-blue-500/30 ${starting ? 'opacity-70 cursor-wait' : ''}`}
+                            className={`w-full max-w-[320px] rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 text-base font-black text-white shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-emerald-500/30 ${starting ? 'opacity-70 cursor-wait' : ''}`}
                         >
                             {starting ? 'Preparing Session...' : 'Start Test Now'}
                         </button>

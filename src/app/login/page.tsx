@@ -111,7 +111,7 @@ export default function LoginPage() {
                                 placeholder="name@company.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
                                 required
                             />
                         </div>
@@ -124,7 +124,7 @@ export default function LoginPage() {
                                 </label>
                                 <Link
                                     href="#"
-                                    className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                                    className="text-sm font-medium text-emerald-600 hover:text-emerald-700"
                                 >
                                     Forgot password?
                                 </Link>
@@ -136,7 +136,7 @@ export default function LoginPage() {
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-11 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                                    className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-11 text-sm text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
                                     required
                                 />
                                 <button
@@ -163,7 +163,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="w-full rounded-lg bg-emerald-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             {loading ? (
                                 <span className="flex items-center justify-center gap-2">
@@ -205,7 +205,7 @@ export default function LoginPage() {
                 {/* Sign up link */}
                 <p className="mt-6 text-sm text-gray-500">
                     Don&apos;t have an account?{' '}
-                    <Link href="/register" className="font-semibold text-blue-600 hover:text-blue-700">
+                    <Link href="/register" className="font-semibold text-emerald-600 hover:text-emerald-700">
                         Get started
                     </Link>
                 </p>

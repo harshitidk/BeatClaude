@@ -67,7 +67,7 @@ export default function SubmissionReviewPage() {
     if (loading) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-[#f5f6f8]">
-                <svg className="h-8 w-8 animate-spin text-blue-500" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#e5e7eb" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                <svg className="h-8 w-8 animate-spin text-emerald-500" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#e5e7eb" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
             </div>
         );
     }
@@ -77,7 +77,7 @@ export default function SubmissionReviewPage() {
             <div className="flex min-h-screen items-center justify-center bg-[#f5f6f8] p-6">
                 <div className="text-center rounded-2xl bg-white p-8 border border-red-200 shadow-sm max-w-sm w-full text-red-600">
                     <p>{error}</p>
-                    <Link href="/dashboard" className="text-sm font-bold text-blue-600 underline mt-4 inline-block">Home</Link>
+                    <Link href="/dashboard" className="text-sm font-bold text-emerald-600 underline mt-4 inline-block">Home</Link>
                 </div>
             </div>
         );
@@ -93,7 +93,7 @@ export default function SubmissionReviewPage() {
             <header className="sticky top-0 z-50 w-full border-b border-gray-200/60 bg-white/80 backdrop-blur-md">
                 <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-3">
                     <div className="flex items-center gap-4">
-                        <Link href="/dashboard" className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 shadow-md shadow-blue-200">
+                        <Link href="/dashboard" className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-teal-700 shadow-md shadow-emerald-200">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" /></svg>
                         </Link>
                         <span className="text-lg font-bold text-gray-900 tracking-tight">Beat Claude HR</span>
@@ -116,7 +116,7 @@ export default function SubmissionReviewPage() {
                     <div className="space-y-6">
                         <div className="rounded-[24px] bg-white p-8 border border-gray-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-gray-900">
                             <h1 className="text-3xl font-black mb-1">{sub.candidate_identifier}</h1>
-                            <p className="text-sm font-semibold text-blue-600 uppercase tracking-widest">{sub.job_title}</p>
+                            <p className="text-sm font-semibold text-emerald-600 uppercase tracking-widest">{sub.job_title}</p>
 
                             {isAiScoring ? (
                                 <div className="mt-8 rounded-xl bg-amber-50 p-6 border border-amber-200 flex items-center gap-3">
@@ -153,19 +153,19 @@ export default function SubmissionReviewPage() {
                                                     <tbody className="divide-y divide-gray-100">
                                                         <tr>
                                                             <td className="px-6 py-4 font-medium">Concept Accuracy</td>
-                                                            <td className="px-6 py-4 text-right font-bold text-blue-600">
+                                                            <td className="px-6 py-4 text-right font-bold text-emerald-600">
                                                                 {scoringBreakdown.scores.reduce((acc: number, s: any) => acc + (s.concept_accuracy || 0), 0)} / {scoringBreakdown.scores.length * 5}
                                                             </td>
                                                         </tr>
                                                         <tr>
                                                             <td className="px-6 py-4 font-medium">Reasoning Quality</td>
-                                                            <td className="px-6 py-4 text-right font-bold text-blue-600">
+                                                            <td className="px-6 py-4 text-right font-bold text-emerald-600">
                                                                 {scoringBreakdown.scores.reduce((acc: number, s: any) => acc + (s.reasoning_quality || 0), 0)} / {scoringBreakdown.scores.length * 5}
                                                             </td>
                                                         </tr>
                                                         <tr>
                                                             <td className="px-6 py-4 font-medium">Clarity</td>
-                                                            <td className="px-6 py-4 text-right font-bold text-blue-600">
+                                                            <td className="px-6 py-4 text-right font-bold text-emerald-600">
                                                                 {scoringBreakdown.scores.reduce((acc: number, s: any) => acc + (s.clarity || 0), 0)} / {scoringBreakdown.scores.length * 5}
                                                             </td>
                                                         </tr>
@@ -178,9 +178,9 @@ export default function SubmissionReviewPage() {
                                             <h4 className="text-xs font-bold uppercase text-gray-400 tracking-wider">Dimensional Feedback</h4>
                                             {scoringBreakdown.stages.map((stage: any) => (
                                                 <div key={stage.stage_index} className="rounded-xl border border-gray-100 bg-gray-50 p-4 pl-5 relative overflow-hidden">
-                                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-blue-600"></div>
+                                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600"></div>
                                                     <div className="flex justify-between items-start mb-1">
-                                                        <span className="text-xs font-black uppercase tracking-widest text-blue-900">STAGE {stage.stage_index}</span>
+                                                        <span className="text-xs font-black uppercase tracking-widest text-emerald-900">STAGE {stage.stage_index}</span>
                                                         <span className="text-sm font-black text-gray-900">{stage.score}/10</span>
                                                     </div>
                                                     <p className="text-sm text-gray-600 mt-1">
@@ -202,7 +202,7 @@ export default function SubmissionReviewPage() {
                         {/* Raw Responses Log */}
                         <h2 className="text-xl font-black text-gray-900 mt-12 mb-6 flex items-center gap-2">
                             Raw Candidate Responses
-                            <span className="text-xs font-bold bg-blue-100 text-blue-600 px-2.5 py-1 rounded-full">{sub.stages.reduce((acc: number, s: any) => acc + s.answers.length, 0)}</span>
+                            <span className="text-xs font-bold bg-emerald-100 text-emerald-600 px-2.5 py-1 rounded-full">{sub.stages.reduce((acc: number, s: any) => acc + s.answers.length, 0)}</span>
                         </h2>
 
                         <div className="space-y-8">
@@ -220,10 +220,10 @@ export default function SubmissionReviewPage() {
 
                                         let borderColor = 'border-gray-200';
                                         let bgClass = 'bg-white';
-                                        let innerBgClass = 'bg-blue-50/50';
-                                        let innerBorderClass = 'border-blue-100';
-                                        let labelColorClass = 'text-blue-400';
-                                        let valueColorClass = 'text-blue-900';
+                                        let innerBgClass = 'bg-emerald-50/50';
+                                        let innerBorderClass = 'border-emerald-100';
+                                        let labelColorClass = 'text-emerald-400';
+                                        let valueColorClass = 'text-emerald-900';
 
                                         if (isCorrect === true) {
                                             borderColor = 'border-emerald-300';
@@ -242,10 +242,10 @@ export default function SubmissionReviewPage() {
                                         }
 
                                         return (
-                                            <div key={i} className={`rounded-2xl border shadow-sm p-6 focus-within:ring-2 ring-blue-500 ${bgClass} ${borderColor}`}>
+                                            <div key={i} className={`rounded-2xl border shadow-sm p-6 focus-within:ring-2 ring-emerald-500 ${bgClass} ${borderColor}`}>
                                                 <div className="flex justify-between items-start gap-4 mb-3">
                                                     <p className="text-sm font-bold text-gray-900 leading-relaxed max-w-3xl">
-                                                        <span className="text-blue-600 mr-2">Q{(stage.stage_index - 1) * 4 + i + 1}.</span>
+                                                        <span className="text-emerald-600 mr-2">Q{(stage.stage_index - 1) * 4 + i + 1}.</span>
                                                         {ans.prompt_text}
                                                     </p>
                                                 </div>
@@ -266,7 +266,7 @@ export default function SubmissionReviewPage() {
                                                         </div>
                                                     ) : ans.question_type === 'short_structured' ? (
                                                         <div>
-                                                            <span className={`text-[10px] font-bold uppercase tracking-widest block mb-2 text-blue-400`}>Written Response</span>
+                                                            <span className={`text-[10px] font-bold uppercase tracking-widest block mb-2 text-emerald-400`}>Written Response</span>
                                                             <p className={`text-sm font-medium whitespace-pre-wrap text-gray-800`}>
                                                                 {ans.answer_text || <span className="text-gray-400 italic">No answer provided</span>}
                                                             </p>
@@ -286,7 +286,7 @@ export default function SubmissionReviewPage() {
                                                                 )}
                                                             </div>
                                                             <div>
-                                                                <span className={`text-[10px] font-bold uppercase tracking-widest block mb-1 text-blue-400`}>Justification</span>
+                                                                <span className={`text-[10px] font-bold uppercase tracking-widest block mb-1 text-emerald-400`}>Justification</span>
                                                                 <p className={`text-sm font-medium whitespace-pre-wrap text-gray-800`}>
                                                                     {ans.answer_text || 'None'}
                                                                 </p>

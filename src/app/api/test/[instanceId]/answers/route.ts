@@ -84,7 +84,7 @@ export async function POST(
         if (advance_stage) {
             const nextStage = instance.currentStage + 1;
 
-            if (nextStage > 4) {
+            if (nextStage > 3) {
                 // All stages completed — mark submitted
                 const now = new Date();
                 const timeTaken = instance.startedAt
@@ -97,7 +97,7 @@ export async function POST(
                         status: 'submitted',
                         completedAt: now,
                         timeTakenSeconds: timeTaken,
-                        currentStage: 4,
+                        currentStage: 3,
                         scoringStatus: 'pending',
                     },
                 });
@@ -137,7 +137,7 @@ export async function POST(
                 return NextResponse.json({
                     status: 'in_progress',
                     current_stage: nextStage,
-                    total_stages: 4,
+                    total_stages: 3,
                     questions: nextQuestions,
                 });
             }

@@ -31,10 +31,10 @@ export async function POST(
             return NextResponse.json({ error: 'Assessment is already published or closed' }, { status: 403 });
         }
 
-        // Validation: 16 questions
-        if (assessment.questions.length !== 16) {
+        // Validation: 12 questions
+        if (assessment.questions.length !== 12) {
             return NextResponse.json(
-                { error: `Assessment requires exactly 16 questions, has ${assessment.questions.length}` },
+                { error: `Assessment requires exactly 12 questions, has ${assessment.questions.length}` },
                 { status: 422 }
             );
         }
@@ -48,8 +48,8 @@ export async function POST(
             );
         }
 
-        // Validate all 4 stages have 4 questions
-        for (let stage = 1; stage <= 4; stage++) {
+        // Validate all 3 stages have 4 questions
+        for (let stage = 1; stage <= 3; stage++) {
             const count = assessment.questions.filter(q => q.stageIndex === stage).length;
             if (count !== 4) {
                 return NextResponse.json(

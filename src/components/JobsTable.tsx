@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface Job {
@@ -61,10 +61,52 @@ function getSubtitle(job: Job): string | null {
     return parts.join(' · ');
 }
 
-export default function JobsTable({ jobs, onStatusChange, onDelete }: JobsTableProps) {
+const JobsTable = memo(function JobsTable({ jobs, onStatusChange, onDelete }: JobsTableProps) {
     const router = useRouter();
     const [openMenu, setOpenMenu] = useState<string | null>(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+    const [copyingLinkFor, setCopyingLinkFor] = useState<string | null>(null);
+    const [snackbarMsg, setSnackbarMsg] = useState<string | null>(null);
+
+    const handleCopyMagicLink = async (e: React.MouseEvent, job: Job) => {
+        e.stopPropagation();
+        let token = job.invite_token;
+        if (!token && job.assessment_id) {
+            setCopyingLinkFor(job.id);
+            const tokenStr = localStorage.getItem('token');
+            try {
+                const res = await fetch(`/api/assessments/${job.assessment_id}/generate-invite`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokenStr}` },
+                });
+                const data = await res.json();
+                if (data.token) {
+                    token = data.token;
+                    // mutate local list or just rely on clipboard write which happens below
+                } else {
+                    setSnackbarMsg('Could not generate magic link. Please check assessment settings.');
+                    setTimeout(() => setSnackbarMsg(null), 3000);
+                    return;
+                }
+            } catch {
+                setSnackbarMsg('Network error while generating magic link.');
+                setTimeout(() => setSnackbarMsg(null), 3000);
+                return;
+            } finally {
+                setCopyingLinkFor(null);
+            }
+        }
+        if (token) {
+            navigator.clipboard.writeText(`${window.location.origin}/test/invite?token=${token}`);
+            setSnackbarMsg('Magic Link copied to clipboard!');
+            setTimeout(() => setSnackbarMsg(null), 3000);
+        }
+    };
+
+    const handleCreateTest = (e: React.MouseEvent, job: Job) => {
+        e.stopPropagation();
+        router.push(`/dashboard/jobs/${job.id}/review`);
+    };
 
     const handleRowClick = (job: Job) => {
         if (job.status === 'active' || job.status === 'closed') {
@@ -75,9 +117,16 @@ export default function JobsTable({ jobs, onStatusChange, onDelete }: JobsTableP
     };
 
     return (
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div className="rounded-xl border border-gray-200 bg-white shadow-sm relative">
+            {/* Snackbar */}
+            {snackbarMsg && (
+                <div className="absolute -top-14 left-1/2 -translate-x-1/2 rounded-full bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-lg z-50 animate-in fade-in slide-in-from-bottom-2">
+                    {snackbarMsg}
+                </div>
+            )}
+
             {/* Table header */}
-            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-center gap-4 border-b border-gray-100 bg-gray-50/80 px-6 py-3.5 rounded-t-xl">
+            <div className="grid grid-cols-[2fr_1fr_1fr_1.2fr_180px] items-center gap-4 border-b border-gray-100 bg-gray-50/80 px-6 py-3.5 rounded-t-xl">
                 <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Job Title</span>
                 <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</span>
                 <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Candidates</span>
@@ -94,20 +143,22 @@ export default function JobsTable({ jobs, onStatusChange, onDelete }: JobsTableP
                     <div
                         key={job.id}
                         onClick={() => handleRowClick(job)}
-                        className={`grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-center gap-4 px-6 py-4 transition-colors hover:bg-blue-50/40 cursor-pointer ${index < jobs.length - 1 ? 'border-b border-gray-100' : ''
+                        onMouseEnter={() => {
+                            const path = job.status === 'active' || job.status === 'closed'
+                                ? `/dashboard/jobs/${job.id}/results`
+                                : `/dashboard/jobs/${job.id}/review`;
+                            router.prefetch(path);
+                        }}
+                        className={`grid grid-cols-[2fr_1fr_1fr_1.2fr_180px] items-center gap-4 px-6 py-4 transition-colors hover:bg-emerald-50/40 cursor-pointer ${index < jobs.length - 1 ? 'border-b border-gray-100' : ''
                             }`}
                     >
                         {/* Title */}
                         <div>
-                            <button
-                                className="text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 text-left transition-colors"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRowClick(job);
-                                }}
+                            <span
+                                className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:underline underline-offset-2 text-left transition-colors"
                             >
                                 {displayTitle}
-                            </button>
+                            </span>
                             {subtitle && (
                                 <p className="mt-0.5 text-xs text-gray-400">{subtitle}</p>
                             )}
@@ -130,26 +181,35 @@ export default function JobsTable({ jobs, onStatusChange, onDelete }: JobsTableP
                         </div>
 
                         {/* Actions */}
-                        <div className="relative flex justify-end items-center gap-1">
-                            {job.invite_token && (
+                        <div className="relative flex justify-end items-center gap-3">
+                            {job.assessment_id ? (
                                 <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        navigator.clipboard.writeText(`${window.location.origin}/test/invite?token=${job.invite_token}`);
-                                        alert('Magic link copied to clipboard!');
-                                    }}
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                                    onClick={(e) => handleCopyMagicLink(e, job)}
+                                    disabled={copyingLinkFor === job.id}
+                                    className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition-colors"
                                     title="Copy Magic Link"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="h-[18px] w-[18px]">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                                    </svg>
+                                    {copyingLinkFor === job.id ? (
+                                        <svg className="h-4 w-4 animate-spin text-emerald-600" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-4 w-4">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+                                        </svg>
+                                    )}
+                                    Magic Link
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={(e) => handleCreateTest(e, job)}
+                                    className="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+                                >
+                                    Create Test
                                 </button>
                             )}
 
                             <button
                                 onClick={(e) => { e.stopPropagation(); setOpenMenu(openMenu === job.id ? null : job.id); }}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors shrink-0"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-5 w-5">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
@@ -164,7 +224,7 @@ export default function JobsTable({ jobs, onStatusChange, onDelete }: JobsTableP
                                         {(job.status === 'draft' || job.status === 'closed') && (
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); onStatusChange(job.id, 'active'); setOpenMenu(null); }}
-                                                className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                                className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
@@ -257,4 +317,6 @@ export default function JobsTable({ jobs, onStatusChange, onDelete }: JobsTableP
             )}
         </div>
     );
-}
+});
+
+export default JobsTable;

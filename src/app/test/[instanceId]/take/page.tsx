@@ -237,7 +237,7 @@ export default function TestTakePage() {
         return (
             <div className="flex min-h-screen items-center justify-center bg-[#f5f6f8]">
                 <div className="flex flex-col items-center">
-                    <svg className="h-8 w-8 animate-spin text-blue-500" viewBox="0 0 24 24" fill="none">
+                    <svg className="h-8 w-8 animate-spin text-emerald-500" viewBox="0 0 24 24" fill="none">
                         <circle cx="12" cy="12" r="10" stroke="#e5e7eb" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
@@ -254,8 +254,8 @@ export default function TestTakePage() {
                 <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
                     <div className="flex items-center gap-4">
                         <span className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 shadow-inner">
-                            <span className="h-2 w-2 rounded-full animate-pulse bg-blue-500"></span>
-                            <span className="text-xs font-black uppercase tracking-widest text-gray-500">Section {stage} of 4</span>
+                            <span className="h-2 w-2 rounded-full animate-pulse bg-emerald-500"></span>
+                            <span className="text-xs font-black uppercase tracking-widest text-gray-500">Section {stage} of 3</span>
                         </span>
                     </div>
 
@@ -285,7 +285,7 @@ export default function TestTakePage() {
                         return (
                             <div key={q.id} className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
                                 <div className="mb-4 flex items-center justify-between">
-                                    <span className="text-xs font-black tracking-widest text-blue-600">QUESTION {(stage - 1) * 4 + idx + 1}</span>
+                                    <span className="text-xs font-black tracking-widest text-emerald-600">QUESTION {(stage - 1) * 4 + idx + 1}</span>
                                     {q.char_limit && showTextarea && (
                                         <span className={`text-[10px] font-bold uppercase ${ans.answer_text.length > q.char_limit ? 'text-red-600' : 'text-gray-400'}`}>
                                             {ans.answer_text.length} / {q.char_limit} chars
@@ -301,15 +301,15 @@ export default function TestTakePage() {
                                                 key={opt.id}
                                                 onClick={() => handleAnswerChange(q.id, opt.id, 'option')}
                                                 className={`flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-all ${ans.selected_option_id === opt.id
-                                                    ? 'border-blue-500 bg-blue-50/50 shadow-inner'
+                                                    ? 'border-emerald-500 bg-emerald-50/50 shadow-inner'
                                                     : 'border-gray-100 bg-white hover:border-gray-200 hover:bg-gray-50'
                                                     }`}
                                             >
-                                                <div className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 ${ans.selected_option_id === opt.id ? 'border-blue-600 bg-blue-600' : 'border-gray-300'
+                                                <div className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 ${ans.selected_option_id === opt.id ? 'border-emerald-600 bg-emerald-600' : 'border-gray-300'
                                                     }`}>
                                                     {ans.selected_option_id === opt.id && <div className="h-2 w-2 rounded-full bg-white" />}
                                                 </div>
-                                                <span className={`text-sm ${ans.selected_option_id === opt.id ? 'font-semibold text-blue-900' : 'text-gray-700'}`}>
+                                                <span className={`text-sm ${ans.selected_option_id === opt.id ? 'font-semibold text-emerald-900' : 'text-gray-700'}`}>
                                                     {opt.label}
                                                 </span>
                                             </label>
@@ -323,7 +323,7 @@ export default function TestTakePage() {
                                             value={ans.answer_text}
                                             onChange={(e) => handleAnswerChange(q.id, e.target.value, 'text')}
                                             placeholder="Type your answer here..."
-                                            className={`min-h-[160px] w-full resize-y rounded-xl border-2 bg-gray-50/50 p-4 text-sm text-gray-900 outline-none transition-all placeholder:text-gray-400 focus:bg-white focus:ring-4 focus:ring-blue-100 ${q.char_limit && ans.answer_text.length > q.char_limit ? 'border-red-400' : 'border-gray-200 focus:border-blue-400'
+                                            className={`min-h-[160px] w-full resize-y rounded-xl border-2 bg-gray-50/50 p-4 text-sm text-gray-900 outline-none transition-all placeholder:text-gray-400 focus:bg-white focus:ring-4 focus:ring-emerald-100 ${q.char_limit && ans.answer_text.length > q.char_limit ? 'border-red-400' : 'border-gray-200 focus:border-emerald-400'
                                                 }`}
                                         />
                                     </div>
@@ -345,15 +345,21 @@ export default function TestTakePage() {
                     </button>
                     <button
                         onClick={() => {
-                            if (!hasSeenNextWarning && stage < 4) {
+                            if (!hasSeenNextWarning && stage < 3) {
                                 setShowNextModal(true);
                             } else {
                                 submitAnswers(true);
                             }
                         }}
-                        className="rounded-xl bg-gray-900 px-8 py-3.5 text-sm font-black text-white shadow-xl hover:bg-gray-800 transition-all hover:shadow-gray-900/20 active:translate-y-[1px]"
+                        disabled={submitting}
+                        className={`rounded-xl px-8 py-3.5 text-sm font-black text-white shadow-xl transition-all hover:shadow-gray-900/20 active:translate-y-[1px] ${submitting ? 'bg-emerald-600 opacity-90 cursor-not-allowed' : 'bg-gray-900 hover:bg-gray-800'}`}
                     >
-                        {stage === 4 ? 'Submit Final Answers' : 'Next Section →'}
+                        {submitting ? (
+                            <span className="flex items-center gap-2">
+                                <svg className="h-4 w-4 animate-spin text-white" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                                Loading...
+                            </span>
+                        ) : (stage === 3 ? 'Submit Final Answers' : 'Next Section →')}
                     </button>
                 </div>
             </div>
@@ -378,7 +384,7 @@ export default function TestTakePage() {
                                     submitAnswers(true);
                                 }}
                                 disabled={submitting}
-                                className="w-full rounded-xl bg-blue-600 py-3.5 text-sm font-black text-white shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                                className="w-full rounded-xl bg-emerald-600 py-3.5 text-sm font-black text-white shadow-lg hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
                             >
                                 {submitting ? 'Saving...' : 'Proceed to next section'}
                             </button>

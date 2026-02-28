@@ -23,7 +23,7 @@ export default function DashboardHeader({ userEmail, onCreateJob, creating }: Da
             <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
                 {/* Logo */}
                 <Link href="/dashboard" className="flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 shadow-md shadow-blue-200">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-teal-700 shadow-md shadow-emerald-200">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" />
                         </svg>
@@ -36,7 +36,7 @@ export default function DashboardHeader({ userEmail, onCreateJob, creating }: Da
                     <button
                         onClick={onCreateJob}
                         disabled={creating}
-                        className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-200 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-all duration-200 hover:shadow-lg hover:shadow-blue-300"
+                        className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-300"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="h-4 w-4">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -46,7 +46,7 @@ export default function DashboardHeader({ userEmail, onCreateJob, creating }: Da
 
                     {/* User avatar */}
                     <div className="relative group">
-                        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-sm font-bold text-gray-600 ring-2 ring-white shadow-sm hover:ring-blue-200 transition-all">
+                        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-sm font-bold text-gray-600 ring-2 ring-white shadow-sm hover:ring-emerald-200 transition-all">
                             {userEmail ? userEmail[0].toUpperCase() : 'U'}
                         </button>
                         {/* Dropdown */}

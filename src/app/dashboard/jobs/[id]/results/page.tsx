@@ -38,6 +38,19 @@ export default function JobResultsPage() {
         const token = localStorage.getItem('token');
         if (!token) { router.push('/login'); return; }
 
+        // Optimistic UI: Preload cached results instantly
+        const cacheKey = `results_cache_${jobId}`;
+        const cacheStr = localStorage.getItem(cacheKey);
+        if (cacheStr) {
+            try {
+                const cachedData = JSON.parse(cacheStr);
+                if (cachedData) {
+                    setData(cachedData);
+                    setLoading(false); // remove visual blocker if we have cache
+                }
+            } catch { /* invalid cache, fall through */ }
+        }
+
         async function fetchResults() {
             try {
                 const res = await fetch(`/api/jobs/${jobId}/results`, {
@@ -46,6 +59,7 @@ export default function JobResultsPage() {
                 if (res.ok) {
                     const json = await res.json();
                     setData(json);
+                    localStorage.setItem(cacheKey, JSON.stringify(json));
                 } else {
                     const err = await res.json();
                     setError(err.error || 'Failed to loaded results.');
@@ -63,7 +77,7 @@ export default function JobResultsPage() {
     if (loading) {
         return (
             <div className="flex min-h-screen flex-col bg-[#f5f6f8] items-center justify-center">
-                <svg className="h-8 w-8 animate-spin text-blue-500" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#e5e7eb" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                <svg className="h-8 w-8 animate-spin text-emerald-500" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#e5e7eb" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
                 <p className="mt-4 text-sm text-gray-500">Loading results...</p>
             </div>
         );
@@ -74,7 +88,7 @@ export default function JobResultsPage() {
             <div className="flex min-h-screen items-center justify-center bg-[#f5f6f8] p-6">
                 <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg border border-red-100">
                     <p className="text-red-500">{error}</p>
-                    <Link href="/dashboard" className="mt-4 inline-block font-bold text-blue-600">Back to Dashboard</Link>
+                    <Link href="/dashboard" className="mt-4 inline-block font-bold text-emerald-600">Back to Dashboard</Link>
                 </div>
             </div>
         );
@@ -130,7 +144,7 @@ export default function JobResultsPage() {
             <header className="sticky top-0 z-50 w-full border-b border-gray-200/60 bg-white/80 backdrop-blur-md">
                 <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-3">
                     <Link href="/dashboard" className="flex items-center gap-2.5">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 shadow-md shadow-blue-200">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-teal-700 shadow-md shadow-emerald-200">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" /></svg>
                         </div>
                         <span className="text-lg font-bold text-gray-900 tracking-tight">Beat Claude</span>
@@ -163,14 +177,14 @@ export default function JobResultsPage() {
                             placeholder="Filter by name or email..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-sm"
+                            className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all shadow-sm"
                         />
                     </div>
                     <div className="relative w-full max-w-xs">
                         <select
                             value={filterRec}
                             onChange={(e) => setFilterRec(e.target.value)}
-                            className="w-full appearance-none rounded-xl border border-gray-200 bg-white py-2.5 pl-4 pr-10 text-sm font-medium text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-sm"
+                            className="w-full appearance-none rounded-xl border border-gray-200 bg-white py-2.5 pl-4 pr-10 text-sm font-medium text-gray-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all shadow-sm"
                         >
                             <option value="All">All Recommendations</option>
                             <option value="Advance">Advance</option>
@@ -183,14 +197,14 @@ export default function JobResultsPage() {
                     </div>
                     <button
                         onClick={exportToCSV}
-                        className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-blue-50 py-2.5 px-4 text-sm font-bold text-blue-700 shadow-sm border border-blue-100 hover:bg-blue-100 transition-all focus:ring-2 focus:ring-blue-500 active:scale-95 whitespace-nowrap ml-auto"
+                        className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-emerald-50 py-2.5 px-4 text-sm font-bold text-emerald-700 shadow-sm border border-emerald-100 hover:bg-emerald-100 transition-all focus:ring-2 focus:ring-emerald-500 active:scale-95 whitespace-nowrap ml-auto"
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                         Export CSV
                     </button>
                 </div>
 
-                <div className="overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-xl shadow-blue-900/5">
+                <div className="overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-xl shadow-emerald-900/5">
                     <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 border-b border-gray-100 bg-gray-50/80 px-8 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">
                         <div>Candidate ID</div>
                         <div>Date</div>
@@ -204,7 +218,7 @@ export default function JobResultsPage() {
                             <div className="p-12 text-center text-gray-500">No matching submissions found.</div>
                         ) : (
                             filteredSubmissions.map(sub => (
-                                <div key={sub.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-center gap-4 px-8 py-5 transition-colors hover:bg-blue-50/30">
+                                <div key={sub.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-center gap-4 px-8 py-5 transition-colors hover:bg-emerald-50/30">
                                     <div className="flex flex-col">
                                         <div className="font-mono text-sm font-black text-gray-900">{sub.candidate_identifier}</div>
                                         {sub.candidate_email && (
@@ -235,7 +249,8 @@ export default function JobResultsPage() {
                                     <div>
                                         <button
                                             onClick={() => router.push(`/dashboard/submissions/${sub.id}`)}
-                                            className="rounded-lg bg-white border border-gray-200 px-4 py-2 text-xs font-bold text-gray-700 shadow-sm hover:bg-gray-50 hover:text-blue-600 transition-all active:scale-95"
+                                            onMouseEnter={() => router.prefetch(`/dashboard/submissions/${sub.id}`)}
+                                            className="rounded-lg bg-white border border-gray-200 px-4 py-2 text-xs font-bold text-gray-700 shadow-sm hover:bg-gray-50 hover:text-emerald-600 transition-all active:scale-95"
                                         >
                                             Review
                                         </button>

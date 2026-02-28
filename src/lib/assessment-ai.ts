@@ -1,8 +1,8 @@
 /**
  * Assessment Generator — LLM-powered test generation
  *
- * Takes a parsed JD schema and generates a 16-question staged assessment
- * (4 stages × 4 questions) following progressive cognitive escalation.
+ * Takes a parsed JD schema and generates a 12-question staged assessment
+ * (3 stages × 4 questions) following progressive cognitive escalation.
  */
 
 import { ParsedJDSchema } from './gemini';
@@ -37,19 +37,23 @@ export interface GeneratedAssessment {
 // ─── Prompt ─────────────────────────────────────────────
 
 function buildTestGenerationPrompt(schema: ParsedJDSchema): string {
-    return `You are an expert assessment designer and hiring analyst. Given the parsed schema below (JSON), generate a 16-question assessment grouped into 4 stages (stage_index 1..4). Follow these rules exactly:
+    return `You are an expert assessment designer and hiring analyst. Given the parsed schema below (JSON), generate a 12-question assessment grouped into 3 stages (stage_index 1..3). Follow these rules exactly:
 
 - Output only valid JSON matching the structure below.
 - Each stage must contain exactly 4 questions.
+- ENFORCE EXACT COMPOSITION: 8 MCQs and 4 short answers total.
+- Stage 1 MUST contain exactly 4 MCQs.
+- Stage 2 MUST contain exactly 4 MCQs.
+- Stage 3 MUST contain exactly 4 short_structured questions.
 - Question fields:
   - question_type: one of ["mcq","short_structured","hybrid_choice_justification"]
   - prompt_text: string
-  - options: array for mcq/hybrid (max 4 options, each with "id", "label", and exactly one with "is_correct": true), otherwise []
-  - char_limit: integer for short_structured (300-400), null for other types
+  - options: array for mcq (max 4 options, each with "id", "label", and exactly one with "is_correct": true), otherwise []
+  - char_limit: integer for short_structured (300-400), null for MCQs
   - scoring_hint: 1-2 line string describing how to grade answers qualitatively
   - internal_intent: one of ["baseline","application","judgment","depth"]
-- Use only up to 2 MCQs in Stage 1 and at most 1 MCQ in Stage 2; Stages 3 and 4 must avoid MCQ and favour hybrid/short_structured.
-- Stage difficulty should escalate: Stage 1 = baseline, Stage 2 = application, Stage 3 = judgment, Stage 4 = depth.
+- MCQ Style: Make them highly detailed, scenario-specific, and deeply technical. Never ask basic or beginner-level definition questions. Present complex real-world situational problems where the candidate must analyze the context to choose the best solution.
+- Short Structured Style: Must be subjective experience-based questions rather than textbook answers.
 - Keep prompts compact (do not include extra explanation).
 - Do not include difficulty labels in candidate-facing prompts.
 - For MCQ options, use ids like "a", "b", "c", "d".
@@ -60,8 +64,7 @@ Output JSON structure:
  "stages": [
    { "stage_index": 1, "questions": [ { "question_type": "", "prompt_text": "", "options": [], "char_limit": null, "scoring_hint": "", "internal_intent": "baseline" }, ... ] },
    { "stage_index": 2, "questions": [ ... ] },
-   { "stage_index": 3, "questions": [ ... ] },
-   { "stage_index": 4, "questions": [ ... ] }
+   { "stage_index": 3, "questions": [ ... ] }
  ]
 }
 
@@ -87,8 +90,8 @@ export function validateGeneratedAssessment(data: GeneratedAssessment): Assessme
         return { valid: false, errors };
     }
 
-    if (data.stages.length !== 4) {
-        errors.push(`Expected 4 stages, got ${data.stages.length}`);
+    if (data.stages.length !== 3) {
+        errors.push(`Expected 3 stages, got ${data.stages.length}`);
     }
 
     let totalQuestions = 0;
@@ -127,8 +130,8 @@ export function validateGeneratedAssessment(data: GeneratedAssessment): Assessme
         }
     }
 
-    if (totalQuestions !== 16) {
-        errors.push(`Expected 16 total questions, got ${totalQuestions}`);
+    if (totalQuestions !== 12) {
+        errors.push(`Expected 12 total questions, got ${totalQuestions}`);
     }
 
     return { valid: errors.length === 0, errors };
@@ -252,7 +255,7 @@ export function buildScoringPrompt(
 
 Rules:
 - Output ONLY valid JSON.
-- Provide a score (0-10) and 1-sentence feedback for EACH of the 4 stages.
+- Provide a score (0-10) and 1-sentence feedback for EACH of the 3 stages.
 - Provide an overall_score (0-10) based on the stage scores.
 - Provide recommendation: "Advance" if overall >= 7.0, "Hold" if >= 5.0, "Reject" if < 5.0.
 - Provide an explanation paragraph summarizing their overall strengths and weaknesses.

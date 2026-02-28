@@ -64,6 +64,9 @@ export default function DashboardPage() {
             const data = await res.json();
             setJobs(data.jobs);
             setState(data.jobs.length === 0 ? 'empty' : 'populated');
+
+            // Save to cache for instant future loads
+            localStorage.setItem('dashboard_cache', JSON.stringify(data.jobs));
         } catch {
             setError('Network error. Please check your connection.');
             setState('error');
@@ -78,6 +81,21 @@ export default function DashboardPage() {
                 const user = JSON.parse(userStr);
                 setUserEmail(user.email || '');
             } catch { /* ignore */ }
+        }
+
+        // Optimistic UI: Preload cached dashboard data instantly
+        const cacheKey = 'dashboard_cache';
+        const cacheStr = localStorage.getItem(cacheKey);
+        if (cacheStr) {
+            try {
+                const cachedJobs = JSON.parse(cacheStr);
+                if (cachedJobs.length > 0) {
+                    setJobs(cachedJobs);
+                    setState('populated');
+                } else if (cachedJobs.length === 0) {
+                    setState('empty');
+                }
+            } catch { /* invalid cache, fall through */ }
         }
 
         fetchDashboard();
@@ -131,9 +149,18 @@ export default function DashboardPage() {
     };
 
 
-    const handleStatusChange = async (jobId: string, newStatus: string) => {
+    const handleStatusChange = useCallback(async (jobId: string, newStatus: string) => {
         const token = getToken();
         if (!token) return;
+
+        // Optimistic UI update
+        setJobs(currentJobs => {
+            const nextJobs = currentJobs.map(job =>
+                job.id === jobId ? { ...job, status: newStatus as any } : job
+            );
+            localStorage.setItem('dashboard_cache', JSON.stringify(nextJobs));
+            return nextJobs;
+        });
 
         try {
             const res = await fetch(`/api/jobs/${jobId}/status`, {
@@ -148,19 +175,30 @@ export default function DashboardPage() {
             if (!res.ok) {
                 const data = await res.json();
                 alert(data.error || 'Failed to update status');
+                // Revert on failure
+                fetchDashboard();
                 return;
             }
 
-            // Refresh dashboard
-            await fetchDashboard();
+            // Sync with backend quietly
+            fetchDashboard();
         } catch {
             alert('Network error. Please try again.');
+            fetchDashboard(); // Revert on failure
         }
-    };
+    }, [getToken, fetchDashboard, setJobs]);
 
-    const handleDeleteJob = async (jobId: string) => {
+    const handleDeleteJob = useCallback(async (jobId: string) => {
         const token = getToken();
         if (!token) return;
+
+        // Optimistic UI update
+        setJobs(currentJobs => {
+            const newJobs = currentJobs.filter(job => job.id !== jobId);
+            if (newJobs.length === 0) setState('empty');
+            localStorage.setItem('dashboard_cache', JSON.stringify(newJobs));
+            return newJobs;
+        });
 
         try {
             const res = await fetch(`/api/jobs/${jobId}`, {
@@ -173,15 +211,16 @@ export default function DashboardPage() {
             if (!res.ok) {
                 const data = await res.json();
                 alert(data.error || 'Failed to delete assessment');
+                fetchDashboard(); // Revert
                 return;
             }
 
-            // Refresh dashboard
-            await fetchDashboard();
+            fetchDashboard();
         } catch {
             alert('Network error. Please try again.');
+            fetchDashboard(); // Revert
         }
-    };
+    }, [getToken, fetchDashboard, setJobs]);
 
     return (
         <div className="flex min-h-screen flex-col bg-[#f5f6f8]">
@@ -227,8 +266,8 @@ export default function DashboardPage() {
                         {/* Footer */}
                         <div className="border-t border-gray-100 bg-gray-50/50 px-6 py-3">
                             <div className="flex items-center gap-2">
-                                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-400" />
-                                <span className="text-xs text-gray-400 animate-pulse">Gathering your latest recruitment data</span>
+                                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+                                <span className="text-xs text-gray-400 animate-pulse">Summoning your candidates... 🔮</span>
                             </div>
                         </div>
                     </div>
@@ -236,13 +275,13 @@ export default function DashboardPage() {
                     {/* Progress bar */}
                     <div className="mt-6 mx-auto max-w-sm">
                         <div className="h-1 overflow-hidden rounded-full bg-gray-200">
-                            <div className="h-full w-1/3 animate-[loading_1.5s_ease-in-out_infinite] rounded-full bg-gradient-to-r from-blue-500 to-indigo-500" />
+                            <div className="h-full w-1/3 animate-[loading_1.5s_ease-in-out_infinite] rounded-full bg-gradient-to-r from-emerald-500 to-teal-500" />
                         </div>
                         <p className="mt-2 text-center text-xs text-gray-400 flex items-center justify-center gap-1.5">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-3.5 w-3.5 animate-spin">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                             </svg>
-                            Gathering your latest recruitment data
+                            Brewing up your data... ☕️
                         </p>
                     </div>
                 </main>
@@ -267,7 +306,7 @@ export default function DashboardPage() {
                                 onClick={handleCreateJob}
                                 className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
                             >
-                                Create a job anyway
+                                Send it anyway 🚀
                             </button>
                         </div>
                     </div>
@@ -284,9 +323,9 @@ export default function DashboardPage() {
                 <main className="mx-auto w-full max-w-6xl px-6 py-10">
                     {/* Heading */}
                     <div className="mb-8">
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Jobs Dashboard</h1>
+                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Your Hiring HQ 🎯</h1>
                         <p className="mt-1 text-sm text-gray-500">
-                            Manage and monitor your AI-driven recruitment pipeline.
+                            Keep tabs on your AI-powered recruitment magic.
                         </p>
                     </div>
 

@@ -75,19 +75,20 @@ export default function ReviewPage() {
 
         async function fetchData() {
             try {
-                // Fetch job details
-                const jobRes = await fetch(`/api/jobs/${jobId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                // Fetch job details and schema in parallel
+                const [jobRes, schemaRes] = await Promise.all([
+                    fetch(`/api/jobs/${jobId}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }),
+                    fetch(`/api/jobs/${jobId}/schema`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    })
+                ]);
+
                 if (jobRes.ok) {
                     const jobData = await jobRes.json();
                     setJobTitle(jobData.title);
                 }
-
-                // Fetch parsed schema
-                const schemaRes = await fetch(`/api/jobs/${jobId}/schema`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
 
                 if (schemaRes.ok) {
                     const schemaData = await schemaRes.json();
@@ -120,7 +121,7 @@ export default function ReviewPage() {
                 <header className="sticky top-0 z-50 w-full border-b border-gray-200/60 bg-white/80 backdrop-blur-md">
                     <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
                         <Link href="/dashboard" className="flex items-center gap-2.5">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 shadow-md shadow-blue-200">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-teal-700 shadow-md shadow-emerald-200">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" /></svg>
                             </div>
                             <span className="text-lg font-bold text-gray-900 tracking-tight">Beat Claude</span>
@@ -129,7 +130,7 @@ export default function ReviewPage() {
                 </header>
                 <main className="flex flex-1 items-center justify-center">
                     <div className="text-center">
-                        <svg className="mx-auto h-8 w-8 animate-spin text-blue-500" viewBox="0 0 24 24" fill="none">
+                        <svg className="mx-auto h-8 w-8 animate-spin text-emerald-500" viewBox="0 0 24 24" fill="none">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                         </svg>
@@ -146,7 +147,7 @@ export default function ReviewPage() {
             <header className="sticky top-0 z-50 w-full border-b border-gray-200/60 bg-white/80 backdrop-blur-md">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
                     <Link href="/dashboard" className="flex items-center gap-2.5">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 shadow-md shadow-blue-200">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-teal-700 shadow-md shadow-emerald-200">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" /></svg>
                         </div>
                         <span className="text-lg font-bold text-gray-900 tracking-tight">Beat Claude</span>
@@ -158,7 +159,7 @@ export default function ReviewPage() {
                 {/* Back */}
                 <Link
                     href="/dashboard"
-                    className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                    className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-4 w-4">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -170,7 +171,7 @@ export default function ReviewPage() {
                 {error && (
                     <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-6 text-center">
                         <p className="text-sm text-red-600">{error}</p>
-                        <Link href="/dashboard" className="mt-3 inline-block text-sm font-semibold text-blue-600 hover:underline">
+                        <Link href="/dashboard" className="mt-3 inline-block text-sm font-semibold text-emerald-600 hover:underline">
                             Return to Dashboard
                         </Link>
                     </div>
@@ -217,7 +218,7 @@ export default function ReviewPage() {
                         {/* Layer 1: Role Classification */}
                         <div className="mb-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                             <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-gray-500">
-                                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">1</span>
+                                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-600">1</span>
                                 Role Classification
                             </h2>
                             <div className="grid grid-cols-2 gap-4">
@@ -245,7 +246,7 @@ export default function ReviewPage() {
                         {/* Layer 2: Competencies */}
                         <div className="mb-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                             <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-gray-500">
-                                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">2</span>
+                                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-600">2</span>
                                 Core Competencies
                                 <span className="ml-auto text-xs font-normal text-gray-400">
                                     {parsed.core_competencies.length} competencies • Weights sum to {parsed.core_competencies.reduce((s, c) => s + c.weight, 0).toFixed(2)}
@@ -257,11 +258,11 @@ export default function ReviewPage() {
                                         <div className="flex-1">
                                             <div className="flex items-center justify-between mb-1.5">
                                                 <span className="text-sm font-semibold text-gray-800">{comp.name}</span>
-                                                <span className="text-xs font-bold text-blue-600">{(comp.weight * 100).toFixed(0)}%</span>
+                                                <span className="text-xs font-bold text-emerald-600">{(comp.weight * 100).toFixed(0)}%</span>
                                             </div>
                                             <div className="h-2 overflow-hidden rounded-full bg-gray-100">
                                                 <div
-                                                    className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500"
+                                                    className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500"
                                                     style={{ width: `${comp.weight * 100}%` }}
                                                 />
                                             </div>
@@ -276,12 +277,12 @@ export default function ReviewPage() {
                             {/* Tools */}
                             <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                                 <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-gray-500">
-                                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">3</span>
+                                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-600">3</span>
                                     Tools
                                 </h2>
                                 <div className="flex flex-wrap gap-2">
                                     {parsed.tools.map((tool, i) => (
-                                        <span key={i} className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 border border-blue-200">
+                                        <span key={i} className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 border border-emerald-200">
                                             {tool}
                                         </span>
                                     ))}
@@ -291,9 +292,9 @@ export default function ReviewPage() {
                                 </div>
                             </div>
 
-                            {/* Constraints */}
+                            {/* Eligibility */}
                             <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                                <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-gray-500">Constraints</h2>
+                                <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-gray-500">Eligibility</h2>
                                 <ul className="space-y-2">
                                     {parsed.constraints.map((c, i) => (
                                         <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
@@ -302,33 +303,13 @@ export default function ReviewPage() {
                                         </li>
                                     ))}
                                     {parsed.constraints.length === 0 && (
-                                        <p className="text-xs text-gray-400">No constraints identified</p>
+                                        <p className="text-xs text-gray-400">No eligibility criteria identified</p>
                                     )}
                                 </ul>
                             </div>
                         </div>
 
-                        {/* Confidence */}
-                        <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-bold uppercase tracking-wider text-gray-500" title="Based on AI's ability to cleanly extract structured data from the provided Job Description.">JD Clarity Score</p>
-                                    <p className="mt-1 text-3xl font-black text-gray-900">{(parsed.confidence_score * 100).toFixed(0)}%</p>
-                                </div>
-                                <div className="h-16 w-16">
-                                    <svg viewBox="0 0 36 36" className="h-16 w-16 -rotate-90">
-                                        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#e5e7eb" strokeWidth="3" />
-                                        <circle
-                                            cx="18" cy="18" r="15.9155" fill="none"
-                                            stroke={parsed.confidence_score >= 0.7 ? '#10b981' : parsed.confidence_score >= 0.4 ? '#f59e0b' : '#ef4444'}
-                                            strokeWidth="3"
-                                            strokeDasharray={`${parsed.confidence_score * 100} ${100 - parsed.confidence_score * 100}`}
-                                            strokeLinecap="round"
-                                        />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
+
 
                         {/* Actions */}
                         <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -347,7 +328,7 @@ export default function ReviewPage() {
                                 <button
                                     onClick={handleGenerateTest}
                                     disabled={!validation.valid || generatingTest}
-                                    className="relative flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-blue-200 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all min-w-[140px]"
+                                    className="relative flex items-center justify-center rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-200 hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all min-w-[140px]"
                                 >
                                     {generatingTest ? (
                                         <svg className="h-5 w-5 animate-spin text-white" viewBox="0 0 24 24" fill="none">

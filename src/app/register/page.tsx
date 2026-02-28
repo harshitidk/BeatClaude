@@ -120,7 +120,7 @@ export default function RegisterPage() {
                                 placeholder="name@company.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
                                 required
                             />
                         </div>
@@ -137,7 +137,7 @@ export default function RegisterPage() {
                                     placeholder="Minimum 8 characters"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-11 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                                    className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-11 text-sm text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
                                     required
                                     minLength={8}
                                 />
@@ -172,7 +172,7 @@ export default function RegisterPage() {
                                 placeholder="Re-enter your password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
                                 required
                                 minLength={8}
                             />
@@ -182,7 +182,7 @@ export default function RegisterPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="w-full rounded-lg bg-emerald-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             {loading ? (
                                 <span className="flex items-center justify-center gap-2">
@@ -224,7 +224,7 @@ export default function RegisterPage() {
                 {/* Sign in link */}
                 <p className="mt-6 text-sm text-gray-500">
                     Already have an account?{' '}
-                    <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-700">
+                    <Link href="/login" className="font-semibold text-emerald-600 hover:text-emerald-700">
                         Sign in
                     </Link>
                 </p>

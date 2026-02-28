@@ -8,7 +8,7 @@ export default function TestCompletePage() {
 
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-[#f5f6f8] px-6">
-            <div className="w-full max-w-lg rounded-3xl border border-gray-100 bg-white p-12 text-center shadow-xl shadow-blue-900/5">
+            <div className="w-full max-w-lg rounded-3xl border border-gray-100 bg-white p-12 text-center shadow-xl shadow-emerald-900/5">
                 <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-emerald-50 text-emerald-500 shadow-inner">
                     <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -30,7 +30,7 @@ export default function TestCompletePage() {
 
             <p className="mt-8 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-gray-400">
                 Powered by
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-700">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-teal-700">
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" /></svg>
                 </span>
                 Beat Claude

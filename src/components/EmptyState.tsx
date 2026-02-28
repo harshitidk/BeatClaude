@@ -36,17 +36,16 @@ export default function EmptyState({ onSubmitJd }: EmptyStateProps) {
         <main className="mx-auto w-full max-w-3xl px-6 py-10">
             {/* Welcome heading */}
             <div className="mb-8 text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 shadow-lg shadow-blue-200">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 shadow-lg shadow-emerald-200">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="h-7 w-7">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                     </svg>
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-                    Start your first assessment
+                    Drop a new role! 🚀
                 </h1>
                 <p className="mt-2 text-sm leading-relaxed text-gray-500 max-w-md mx-auto">
-                    Paste a job description below and our AI will extract role requirements,
-                    competencies, and generate a tailored assessment.
+                    Just drop your JD below. We'll brew up the perfect interview questions while you sip your coffee. ☕️
                 </p>
             </div>
 
@@ -61,8 +60,8 @@ export default function EmptyState({ onSubmitJd }: EmptyStateProps) {
 
                 {/* Label row */}
                 <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold uppercase tracking-wider text-blue-600">
-                        Job Description
+                    <label className="text-xs font-bold uppercase tracking-wider text-emerald-600">
+                        Put in the JD here
                     </label>
                     <span className="text-xs italic text-gray-400">Format: Plain text or Markdown</span>
                 </div>
@@ -72,10 +71,10 @@ export default function EmptyState({ onSubmitJd }: EmptyStateProps) {
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        placeholder={`Example:\nWe are looking for a Senior Product Designer to join our team...\nRequirements:\n- 5+ years of experience in SaaS\n- Proficient in Figma and Design Systems...`}
+                        placeholder={`Paste that chunky text right here! ✨`}
                         rows={10}
                         disabled={submitting}
-                        className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50/50 px-5 py-4 text-sm leading-relaxed text-gray-700 placeholder:text-gray-400/70 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all disabled:opacity-50"
+                        className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50/50 px-5 py-4 text-sm leading-relaxed text-gray-700 placeholder:text-gray-400/70 focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100 transition-all disabled:opacity-50"
                     />
                     {/* Send icon */}
                     <div className="absolute bottom-4 right-4">
@@ -90,7 +89,7 @@ export default function EmptyState({ onSubmitJd }: EmptyStateProps) {
                     <button
                         onClick={handleSubmit}
                         disabled={submitting}
-                        className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-200 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-all hover:shadow-lg"
+                        className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 transition-all hover:shadow-lg"
                     >
                         {submitting ? (
                             <>
@@ -117,30 +116,30 @@ export default function EmptyState({ onSubmitJd }: EmptyStateProps) {
                 {[
                     {
                         icon: (
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-emerald-600">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                             </svg>
                         ),
-                        title: 'AI OPTIMIZED',
-                        desc: 'Our AI extracts core skills automatically.',
+                        title: 'AI MAGIC 🪄',
+                        desc: 'Skills extraction on autopilot.',
                     },
                     {
                         icon: (
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-emerald-600">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
                             </svg>
                         ),
-                        title: 'PRIVATE & SECURE',
-                        desc: 'Data is used only for this assessment flow.',
+                        title: 'FORT KNOX 🔒',
+                        desc: 'Your data is locked down tight.',
                     },
                     {
                         icon: (
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-emerald-600">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         ),
-                        title: 'FAST SETUP',
-                        desc: 'Ready for review in under 10 seconds.',
+                        title: 'SUPER FAST ⚡️',
+                        desc: 'Blink and it\'s ready.',
                     },
                 ].map((badge) => (
                     <div

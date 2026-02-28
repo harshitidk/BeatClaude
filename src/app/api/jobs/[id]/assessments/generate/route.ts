@@ -108,7 +108,7 @@ export async function POST(
             data: {
                 actorId: auth.user.userId,
                 action: 'assessment.generated',
-                payload: JSON.stringify({ assessmentId, jobId, questionCount: 16 }),
+                payload: JSON.stringify({ assessmentId, jobId, questionCount: 12 }),
             },
         });
 
@@ -121,7 +121,7 @@ export async function POST(
         });
 
         // Group questions by stage
-        const stages = [1, 2, 3, 4].map(stageIndex => ({
+        const stages = [1, 2, 3].map(stageIndex => ({
             stage_index: stageIndex,
             questions: (assessment?.questions ?? [])
                 .filter(q => q.stageIndex === stageIndex)

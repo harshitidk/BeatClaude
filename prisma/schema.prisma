@@ -39,21 +39,23 @@ model Job {
   updatedAt      DateTime @updatedAt
   lastActivityAt DateTime @default(now())
 
-  creator      User                @relation(fields: [createdBy], references: [id])
+  creator      User                  @relation(fields: [createdBy], references: [id])
   parsedSchema ParsedSchema?
   assessments  Assessment[]
   submissions  CandidateSubmission[]
+
+  @@index([createdBy])
 }
 
 // ─── Parsed Schemas ─────────────────────────────────────
 model ParsedSchema {
   id                 String   @id @default(uuid())
   jobId              String   @unique
-  function           String   // Marketing | Finance | HR | Operations | Engineering | Design | Sales | Other
+  function           String // Marketing | Finance | HR | Operations | Engineering | Design | Sales | Other
   roleFamily         String   @default("")
-  seniority          String   // Entry | Mid | Senior
-  competencies       String   // JSON: [{ name, weight }]
-  tooling            String   // JSON: ["tool1", "tool2"]
+  seniority          String // Entry | Mid | Senior
+  competencies       String // JSON: [{ name, weight }]
+  tooling            String // JSON: ["tool1", "tool2"]
   decisionContext    String
   constraints        String   @default("[]") // JSON: ["constraint1", ...]
   confidence         Float
@@ -64,6 +66,8 @@ model ParsedSchema {
   createdAt          DateTime @default(now())
 
   job Job @relation(fields: [jobId], references: [id])
+
+  @@index([jobId])
 }
 
 // ─── Assessments ────────────────────────────────────────
@@ -84,25 +88,29 @@ model Assessment {
   questions     Question[]
   invites       Invite[]
   testInstances TestInstance[]
+
+  @@index([jobId])
 }
 
 // ─── Questions ──────────────────────────────────────────
 model Question {
   id              String   @id @default(uuid())
   assessmentId    String
-  stageIndex      Int      // 1..4
-  positionInStage Int      // 1..4
-  questionType    String   // mcq | short_structured | hybrid_choice_justification
+  stageIndex      Int // 1..4
+  positionInStage Int // 1..4
+  questionType    String // mcq | short_structured | hybrid_choice_justification
   promptText      String
   options         String   @default("[]") // JSON: [{id, label}] for mcq/hybrid
-  charLimit       Int?     // for short_structured
+  charLimit       Int? // for short_structured
   scoringHint     String   @default("") // internal hint for scoring
-  internalIntent  String   // baseline | application | judgment | depth
+  internalIntent  String // baseline | application | judgment | depth
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   assessment Assessment @relation(fields: [assessmentId], references: [id])
   answers    Answer[]
+
+  @@index([assessmentId])
 }
 
 // ─── Invites (Magic Links) ──────────────────────────────
@@ -119,6 +127,9 @@ model Invite {
   assessment    Assessment     @relation(fields: [assessmentId], references: [id])
   creator       User           @relation(fields: [createdBy], references: [id])
   testInstances TestInstance[]
+
+  @@index([assessmentId])
+  @@index([createdBy])
 }
 
 // ─── Test Instances (Candidate Sessions) ────────────────
@@ -144,21 +155,26 @@ model TestInstance {
   assessment Assessment @relation(fields: [assessmentId], references: [id])
   invite     Invite?    @relation(fields: [inviteId], references: [id])
   answers    Answer[]
+
+  @@index([assessmentId])
+  @@index([inviteId])
 }
 
 // ─── Answers ────────────────────────────────────────────
 model Answer {
-  id               String    @id @default(uuid())
+  id               String   @id @default(uuid())
   instanceId       String
   questionId       String
   answerText       String?
   selectedOptionId String?
-  submittedAt      DateTime  @default(now())
+  submittedAt      DateTime @default(now())
 
   instance TestInstance @relation(fields: [instanceId], references: [id])
   question Question     @relation(fields: [questionId], references: [id])
 
   @@unique([instanceId, questionId]) // idempotent upserts
+  @@index([instanceId])
+  @@index([questionId])
 }
 
 // ─── Candidate Submissions (Dashboard Counts) ──────────
@@ -168,6 +184,8 @@ model CandidateSubmission {
   submittedAt DateTime @default(now())
 
   job Job @relation(fields: [jobId], references: [id])
+
+  @@index([jobId])
 }
 
 // ─── Audit Logs ─────────────────────────────────────────

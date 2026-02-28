@@ -44,7 +44,7 @@ function PublishedPage() {
             <div className="flex min-h-screen items-center justify-center bg-[#f5f6f8]">
                 <div className="text-center rounded-xl border border-red-200 bg-red-50 p-6">
                     <p className="text-sm text-red-600">Missing invite token.</p>
-                    <Link href="/dashboard" className="mt-3 inline-block text-sm font-semibold text-blue-600">Back to Dashboard</Link>
+                    <Link href="/dashboard" className="mt-3 inline-block text-sm font-semibold text-emerald-600">Back to Dashboard</Link>
                 </div>
             </div>
         );
@@ -72,7 +72,7 @@ function PublishedPage() {
                             type="text"
                             readOnly
                             value={inviteUrl}
-                            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-600 outline-none selection:bg-blue-100 placeholder:text-gray-300"
+                            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-600 outline-none selection:bg-emerald-100 placeholder:text-gray-300"
                         />
                         <button
                             onClick={copyToClipboard}

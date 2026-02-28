@@ -23,12 +23,7 @@ export async function POST(
             return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
         }
 
-        if (assessment.status !== 'active') {
-            return NextResponse.json(
-                { error: 'Assessment must be active to generate invites' },
-                { status: 403 }
-            );
-        }
+
 
         const body = await request.json().catch(() => ({}));
         const expiresInHours = body.expires_in_hours || 168; // 7 days default

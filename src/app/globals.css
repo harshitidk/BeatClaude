@@ -1,11 +1,15 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: var(--font-sans, "Plus Jakarta Sans"), ui-sans-serif, system-ui, sans-serif;
+}
+
 :root {
-  --brand-primary: #2563eb;
-  --brand-primary-hover: #1d4ed8;
-  --brand-primary-light: #eff6ff;
+  --brand-primary: #10b981;
+  --brand-primary-hover: #059669;
+  --brand-primary-light: #ecfdf5;
   --text-primary: #111827;
-  --text-secondary: #6b7280;
+  --text-secondary: #4f5a60;  /* Slate gray like Mosaic wellness brands text */
   --text-muted: #9ca3af;
   --border-color: #e5e7eb;
   --bg-page: #f9fafb;

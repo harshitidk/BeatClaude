@@ -7,10 +7,7 @@ const prisma = new PrismaClient();
 async function run() {
     const instances = await prisma.testInstance.findMany({
         where: {
-            OR: [
-                { scoringStatus: 'scoring' },
-                { scoringStatus: 'pending' }
-            ]
+            status: 'submitted'
         },
         include: {
             answers: true,
@@ -31,7 +28,7 @@ async function run() {
                 data: { scoringStatus: 'scoring' },
             });
 
-            const questions = instance.assessment.questions.map(q => ({
+            const questions = instance.assessment.questions.map((q: any) => ({
                 id: q.id,
                 stage: q.stageIndex,
                 type: q.questionType,
@@ -39,7 +36,7 @@ async function run() {
                 options: q.options,
             }));
 
-            const answers = instance.answers.map(a => ({
+            const answers = instance.answers.map((a: any) => ({
                 questionId: a.questionId,
                 answerText: a.answerText || '',
                 selectedOptionId: a.selectedOptionId || '',

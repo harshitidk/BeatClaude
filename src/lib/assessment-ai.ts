@@ -364,13 +364,15 @@ export async function scoreSubmission(
     if (overall_score >= 7.0) recommendation = 'Advance';
     else if (overall_score >= 5.0) recommendation = 'Hold';
 
+    const scoringInfo = {
+        stages: finalStages,
+        overall_score,
+        recommendation,
+        explanation,
+    };
+
     return {
-        scoring: {
-            stages: finalStages,
-            overall_score,
-            recommendation,
-            explanation,
-        },
-        rawResponse: rawText
+        scoring: scoringInfo,
+        rawResponse: JSON.stringify(scoringInfo, null, 2)
     };
 }

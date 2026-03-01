@@ -238,6 +238,7 @@ export interface ScoringOutput {
 }
 
 export function buildScoringPrompt(
+    stagesToScore: number[],
     questions: Array<{ id: string; stage: number; type: string; prompt: string; options: string }>,
     answers: Array<{ questionId: string; answerText: string; selectedOptionId: string }>
 ): string {
@@ -255,16 +256,12 @@ export function buildScoringPrompt(
 
 Rules:
 - Output ONLY valid JSON.
-- Provide a score (0-10) and 1-sentence feedback for EACH of the 3 stages.
-- Provide an overall_score (0-10) based on the stage scores.
-- Provide recommendation: "Advance" if overall >= 7.0, "Hold" if >= 5.0, "Reject" if < 5.0.
-- Provide an explanation paragraph summarizing their overall strengths and weaknesses.
+- Provide a score (0-10) and 1-sentence feedback for EACH of the following stages: ${stagesToScore.join(', ')}.
+- Provide an explanation paragraph summarizing their overall strengths and weaknesses based on the provided answers.
 
 Output JSON:
 {
-  "stages": [ { "stage_index": 1, "score": 0.0, "feedback": "" }, ... ],
-  "overall_score": 0.0,
-  "recommendation": "Advance|Hold|Reject",
+  "stages": [ { "stage_index": X, "score": 0.0, "feedback": "" } ],
   "explanation": ""
 }
 
@@ -279,37 +276,101 @@ export async function scoreSubmission(
     const apiKey = process.env.NVIDIA_API_KEY;
     if (!apiKey) throw new Error('NVIDIA_API_KEY is not configured');
 
-    const prompt = buildScoringPrompt(questions, answers);
+    const dtStages: StageScore[] = [];
+    const llmQuestions: Array<any> = [];
 
-    const response = await fetch(NVIDIA_API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`,
+    // Group questions by stage
+    const stages = [1, 2, 3];
+    for (const s of stages) {
+        const stageQs = questions.filter(q => q.stage === s);
+        if (stageQs.length === 0) continue;
+
+        // If the stage is strictly MCQs, score it deterministically
+        const allMcq = stageQs.every(q => q.type === 'mcq');
+        if (allMcq) {
+            let correctCount = 0;
+            for (const q of stageQs) {
+                try {
+                    const options = JSON.parse(q.options || '[]');
+                    const correctOption = options.find((o: any) => o.is_correct);
+                    const ans = answers.find(a => a.questionId === q.id);
+                    if (correctOption && ans?.selectedOptionId === correctOption.id) {
+                        correctCount++;
+                    }
+                } catch { }
+            }
+            const score = Math.round((correctCount / stageQs.length) * 10 * 10) / 10;
+            dtStages.push({
+                stage_index: s,
+                score,
+                feedback: `Candidate answered ${correctCount} out of ${stageQs.length} multiple choice questions correctly.`
+            });
+        } else {
+            llmQuestions.push(...stageQs);
+        }
+    }
+
+    const llmStagesToScore = stages.filter(s => !dtStages.find(d => d.stage_index === s) && questions.some(q => q.stage === s));
+
+    let llmStages: StageScore[] = [];
+    let explanation = "Assessment evaluated successfully based on objective multiple choice scoring.";
+    let rawText = "Deterministic scoring only. No LLM call required.";
+
+    if (llmQuestions.length > 0) {
+        const prompt = buildScoringPrompt(llmStagesToScore, llmQuestions, answers);
+
+        const response = await fetch(NVIDIA_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+                model: MODEL,
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0,
+                top_p: 1,
+                max_tokens: 2048,
+            }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`NVIDIA API error (${response.status}): ${errorText}`);
+        }
+
+        const result = await response.json();
+        rawText = result.choices?.[0]?.message?.content;
+        if (!rawText) throw new Error('No content in scoring response');
+
+        let jsonStr = rawText.trim();
+        if (jsonStr.startsWith('```')) {
+            jsonStr = jsonStr.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+        }
+
+        const llmScoring = JSON.parse(jsonStr);
+        if (llmScoring.stages) llmStages = llmScoring.stages;
+        if (llmScoring.explanation) explanation = llmScoring.explanation;
+    }
+
+    // Combine stages
+    const finalStages = [...dtStages, ...llmStages].sort((a, b) => a.stage_index - b.stage_index);
+
+    // Compute overall score & recommendation
+    const sum = finalStages.reduce((acc, s) => acc + s.score, 0);
+    const overall_score = Math.round((sum / Math.max(1, finalStages.length)) * 10) / 10;
+
+    let recommendation: 'Advance' | 'Hold' | 'Reject' = 'Reject';
+    if (overall_score >= 7.0) recommendation = 'Advance';
+    else if (overall_score >= 5.0) recommendation = 'Hold';
+
+    return {
+        scoring: {
+            stages: finalStages,
+            overall_score,
+            recommendation,
+            explanation,
         },
-        body: JSON.stringify({
-            model: MODEL,
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0,
-            top_p: 1,
-            max_tokens: 4096,
-        }),
-    });
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`NVIDIA API error (${response.status}): ${errorText}`);
-    }
-
-    const result = await response.json();
-    const rawText = result.choices?.[0]?.message?.content;
-    if (!rawText) throw new Error('No content in scoring response');
-
-    let jsonStr = rawText.trim();
-    if (jsonStr.startsWith('```')) {
-        jsonStr = jsonStr.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
-    }
-
-    const scoring: ScoringOutput = JSON.parse(jsonStr);
-    return { scoring, rawResponse: rawText };
+        rawResponse: rawText
+    };
 }

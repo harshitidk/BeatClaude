@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { triggerScoring } from '../answers/route';
 
 // POST /api/test/[instanceId]/end — candidate ends test early
 export async function POST(
@@ -40,6 +41,9 @@ export async function POST(
         await prisma.candidateSubmission.create({
             data: { jobId: instance.assessmentId },
         });
+
+        // Await scoring to prevent serverless suspension and ensure immediate analysis
+        await triggerScoring(instanceId).catch(console.error);
 
         return NextResponse.json({
             status: 'submitted',

@@ -107,8 +107,8 @@ export async function POST(
                     data: { jobId: instance.assessment.jobId },
                 });
 
-                // Trigger async scoring (fire and forget)
-                triggerScoring(instanceId).catch(console.error);
+                // Await scoring to prevent serverless suspension and ensure immediate analysis
+                await triggerScoring(instanceId).catch(console.error);
 
                 return NextResponse.json({
                     status: 'submitted',
@@ -152,7 +152,7 @@ export async function POST(
 }
 
 // Async scoring helper
-async function triggerScoring(instanceId: string) {
+export async function triggerScoring(instanceId: string) {
     try {
         const { scoreSubmission } = await import('@/lib/assessment-ai');
 

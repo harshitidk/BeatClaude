@@ -62,7 +62,7 @@ function PublishedPage() {
 
                 <h1 className="text-center text-2xl font-black text-gray-900 tracking-tight">Assessment Published!</h1>
                 <p className="mt-2 text-center text-sm text-gray-500">
-                    Your 16-question generated assessment is now active and ready for candidates. Share the magic link below.
+                    Your 12-question generated assessment is now active and ready for candidates. Share the magic link below.
                 </p>
 
                 <div className="mt-8 rounded-xl border border-gray-200 bg-gray-50 p-5">

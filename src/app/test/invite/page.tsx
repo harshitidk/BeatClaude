@@ -153,9 +153,9 @@ function CandidatePortalInvitePage() {
                             <span className="mt-2 text-center text-[11px] font-medium leading-tight text-gray-500">The timer cannot be paused once started.</span>
                         </div>
                         <div className="flex flex-col items-center rounded-2xl bg-emerald-50 p-6 shadow-sm border border-emerald-100">
-                            <span className="text-2xl font-black text-emerald-900">16 Qs</span>
+                            <span className="text-2xl font-black text-emerald-900">12 Qs</span>
                             <span className="mt-1 text-xs font-bold uppercase tracking-widest text-emerald-400">Total Questions</span>
-                            <span className="mt-2 text-center text-[11px] font-medium leading-tight text-emerald-600">Divided into 4 stages. You cannot return to a previous stage.</span>
+                            <span className="mt-2 text-center text-[11px] font-medium leading-tight text-emerald-600">Divided into 3 stages. You cannot return to a previous stage.</span>
                         </div>
                     </div>
 
